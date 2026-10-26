@@ -9,7 +9,7 @@ metadata:
 spec:
   project: homelab-platform
   source:
-    repoURL: https://example.invalid/homelab-gitops.git
+    repoURL: git@github.com:alvarezallas/gitops-homelab.git
     targetRevision: main
     path: platform/storage
   destination:

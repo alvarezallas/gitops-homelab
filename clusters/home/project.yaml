@@ -8,7 +8,7 @@ metadata:
 spec:
   description: Administración de la plataforma doméstica desde un repositorio de confianza
   sourceRepos:
-  - https://example.invalid/homelab-gitops.git
+  - git@github.com:alvarezallas/gitops-homelab.git
   destinations:
   - server: https://kubernetes.default.svc
     namespace: '*'

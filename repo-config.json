@@ -1,5 +1,5 @@
 {
-  "repoURL": "https://example.invalid/homelab-gitops.git",
+  "repoURL": "git@github.com:alvarezallas/gitops-homelab.git",
   "branch": "main",
-  "configured": false
+  "configured": true
 }
