@@ -1,0 +1,25 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: homelab-kube-state-metrics
+rules:
+- apiGroups:
+  - ''
+  - apps
+  - batch
+  resources:
+  - cronjobs
+  - daemonsets
+  - deployments
+  - jobs
+  - namespaces
+  - nodes
+  - persistentvolumeclaims
+  - persistentvolumes
+  - pods
+  - replicasets
+  - services
+  - statefulsets
+  verbs:
+  - list
+  - watch

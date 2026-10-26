@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-25",
+  "kubernetes_package": "1.36.5-1.1",
+  "kubernetes": "v1.36.5",
+  "minor": "v1.36",
+  "sources": {
+    "argocd": "https://github.com/argoproj/argo-cd/releases/tag/v3.5.6",
+    "prometheus": "https://github.com/prometheus/prometheus/releases/tag/v3.15.1",
+    "grafana": "https://github.com/grafana/grafana/releases/tag/v13.2.4",
+    "node_exporter": "https://github.com/prometheus/node_exporter/releases/tag/v1.12.1",
+    "kubernetes-release.key": "https://pkgs.k8s.io/core:/stable:/v1.36/deb/Release.key",
+    "kube-flannel.yml": "https://github.com/flannel-io/flannel/releases/download/v0.28.10/kube-flannel.yml",
+    "argocd-install.yaml": "https://raw.githubusercontent.com/argoproj/argo-cd/v3.5.6/manifests/install.yaml"
+  },
+  "argocd": "v3.5.6",
+  "prometheus": "v3.15.1",
+  "grafana": "v13.2.4",
+  "node_exporter": "v1.12.1"
+}

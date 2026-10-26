@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- 00-namespace-kube-flannel.yaml
+- 01-serviceaccount-flannel.yaml
+- 02-clusterrole-flannel.yaml
+- 03-clusterrolebinding-flannel.yaml
+- 04-configmap-kube-flannel-cfg.yaml
+- 05-daemonset-kube-flannel-ds.yaml

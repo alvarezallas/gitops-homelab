@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv-12
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  capacity:
+    storage: 12Ti
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-storage
+  mountOptions:
+  - nfsvers=4.2
+  - hard
+  - timeo=600
+  - retrans=2
+  nfs:
+    server: 192.168.1.164
+    path: /mnt/d12tb

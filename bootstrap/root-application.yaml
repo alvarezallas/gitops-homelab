@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homelab-root
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '-40'
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  project: homelab-platform
+  source:
+    repoURL: https://example.invalid/homelab-gitops.git
+    targetRevision: main
+    path: clusters/home
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    syncOptions:
+    - ServerSideApply=true
+    - ClientSideApplyMigration=false
+    - FailOnSharedResource=true
+  revisionHistoryLimit: 10

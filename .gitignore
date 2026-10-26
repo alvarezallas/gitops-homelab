@@ -1,0 +1,21 @@
+# Nunca versionar material privado
+*.key
+*.p12
+*.pfx
+*.aesgcm
+*.pem
+id_*
+*.kubeconfig
+kubeconfig*
+admin.conf
+join.json
+*secret*.local.*
+.env
+.env.*
+private/
+secrets/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+.venv/

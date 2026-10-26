@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- 00-namespace-monitoring.yaml
+- 01-configmap-prometheus-config.yaml
+- 02-deployment-prometheus.yaml
+- 03-service-prometheus.yaml
+- 04-configmap-grafana-provisioning.yaml
+- 05-deployment-grafana.yaml
+- 06-service-grafana.yaml
+- 07-daemonset-node-exporter.yaml
+- 08-serviceaccount-kube-state-metrics.yaml
+- 09-clusterrole-homelab-kube-state-metrics.yaml
+- 10-clusterrolebinding-homelab-kube-state-metrics.yaml
+- 11-deployment-kube-state-metrics.yaml
+- 12-service-kube-state-metrics.yaml

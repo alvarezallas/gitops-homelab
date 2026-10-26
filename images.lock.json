@@ -1,0 +1,52 @@
+[
+  {
+    "image": "ghcr.io/dexidp/dex:v2.45.1",
+    "linux_arm64": true,
+    "digest": "sha256:8499afd690c437f52301efd2b05b2455da5bd2dfc20332cd697dc9937f808462"
+  },
+  {
+    "image": "ghcr.io/flannel-io/flannel-cni-plugin:v1.9.1-flannel3",
+    "linux_arm64": true,
+    "digest": "sha256:9fccdf677e6e26e76a4aa60da2113bab9852e8317287ba51b2c29778d2351345"
+  },
+  {
+    "image": "ghcr.io/flannel-io/flannel:v0.28.10",
+    "linux_arm64": true,
+    "digest": "sha256:f26b2403273cbbce2bdc262c62e7a6e74c0031b139df247fa0fd5801cb9f639d"
+  },
+  {
+    "image": "grafana/grafana:13.2.4",
+    "linux_arm64": true,
+    "digest": "sha256:dbbc38ea21103cefb50396340cd88afec779c7e070b0a7bf5a75b4ce46651d3f"
+  },
+  {
+    "image": "lscr.io/linuxserver/qbittorrent@sha256:304b19cf94bf4fda534e0b086cab9c5f1a9e139a8180c05c0ad7d2ba1526fa99",
+    "linux_arm64": true,
+    "digest": "sha256:304b19cf94bf4fda534e0b086cab9c5f1a9e139a8180c05c0ad7d2ba1526fa99"
+  },
+  {
+    "image": "prom/node-exporter:v1.12.1",
+    "linux_arm64": true,
+    "digest": "sha256:1b4e4438faca4dd7e001dd445d161a4a2091b0fededa84093b3a8dfeae1f1be0"
+  },
+  {
+    "image": "prom/prometheus:v3.15.1",
+    "linux_arm64": true,
+    "digest": "sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2"
+  },
+  {
+    "image": "public.ecr.aws/docker/library/redis:8.2.3-alpine",
+    "linux_arm64": true,
+    "digest": "sha256:08ad0b1d280850169a790dba1393ff7a90aef951fc19632cf4d3ce4f78e679ba"
+  },
+  {
+    "image": "quay.io/argoproj/argocd:v3.5.6",
+    "linux_arm64": true,
+    "digest": "sha256:8e5cc5bb008df8a09dba439462e58c94c55b7735888d3ebde0c25fc05e4e5335"
+  },
+  {
+    "image": "registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0",
+    "linux_arm64": true,
+    "digest": "sha256:42cfe3723a5f058171c627537fb57a3ea0f26e4380fa18555a95cb1a1b4cfc5b"
+  }
+]
