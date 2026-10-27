@@ -10,13 +10,16 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: Prune=false,Delete=false
 spec:
+  type: NodePort
   ports:
   - name: http
     port: 80
+    nodePort: 30079
     protocol: TCP
     targetPort: 8080
   - name: https
     port: 443
+    nodePort: 30080
     protocol: TCP
     targetPort: 8080
   selector:
