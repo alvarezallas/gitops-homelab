@@ -14,3 +14,8 @@ resources:
 - 10-clusterrolebinding-homelab-kube-state-metrics.yaml
 - 11-deployment-kube-state-metrics.yaml
 - 12-service-kube-state-metrics.yaml
+- 13-serviceaccount-prometheus.yaml
+- 14-clusterrole-homelab-prometheus-metrics.yaml
+- 15-clusterrolebinding-homelab-prometheus-metrics.yaml
+- 16-configmap-grafana-cluster-dashboard.yaml
+- 17-configmap-grafana-dashboard-provider.yaml

@@ -1,0 +1,18 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: homelab-prometheus-metrics
+  annotations:
+    argocd.argoproj.io/sync-wave: '-1'
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - nodes/proxy
+  resourceNames:
+  - pi5
+  - pi3b1
+  - pi3b2
+  - pi3b3
+  verbs:
+  - get

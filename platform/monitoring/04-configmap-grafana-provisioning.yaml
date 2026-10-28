@@ -4,6 +4,5 @@ metadata:
   name: grafana-provisioning
   namespace: monitoring
 data:
-  datasource.yaml: '{"apiVersion": 1, "datasources": [{"name": "Prometheus", "type":
-    "prometheus", "uid": "prometheus", "url": "http://prometheus:9090", "access":
-    "proxy", "isDefault": true}]}'
+  datasource.yaml: '{"apiVersion": 1, "datasources": [{"name": "Prometheus", "type": "prometheus", "uid": "prometheus",
+    "url": "http://prometheus:9090", "access": "proxy", "isDefault": true, "jsonData": {"timeInterval": "30s"}}]}'

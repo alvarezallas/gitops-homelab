@@ -14,6 +14,8 @@ spec:
     metadata:
       labels:
         app: grafana
+      annotations:
+        checksum/dashboard-provider: 5c199148fcd93f15de7b714d1284eb91f50efd4951cfd4575bf5d9c6fa932ed4
     spec:
       nodeSelector:
         kubernetes.io/hostname: pi5
@@ -46,6 +48,12 @@ spec:
         - name: config
           mountPath: /etc/grafana/provisioning/datasources
           readOnly: true
+        - name: dashboard-provider
+          mountPath: /etc/grafana/provisioning/dashboards
+          readOnly: true
+        - name: cluster-dashboard
+          mountPath: /var/lib/grafana/dashboards/bearsfamily
+          readOnly: true
         readinessProbe:
           httpGet:
             path: /api/health
@@ -59,3 +67,9 @@ spec:
       - name: config
         configMap:
           name: grafana-provisioning
+      - name: dashboard-provider
+        configMap:
+          name: grafana-dashboard-provider
+      - name: cluster-dashboard
+        configMap:
+          name: grafana-cluster-dashboard

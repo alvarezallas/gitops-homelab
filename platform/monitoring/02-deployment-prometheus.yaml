@@ -14,6 +14,8 @@ spec:
     metadata:
       labels:
         app: prometheus
+      annotations:
+        checksum/config: d9951898140160b67a8b8afa727e716646ffe4458b58a396202fa3612a7a9226
     spec:
       nodeSelector:
         kubernetes.io/hostname: pi5
@@ -56,3 +58,4 @@ spec:
         hostPath:
           path: /opt/monitoring/prometheus
           type: Directory
+      serviceAccountName: prometheus
