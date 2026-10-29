@@ -19,7 +19,6 @@ spec:
       - REVOKE CONNECT ON DATABASE semaphore FROM PUBLIC;
       - GRANT CONNECT ON DATABASE semaphore TO semaphore_app;
       - REVOKE CREATE ON SCHEMA public FROM PUBLIC;
-      - GRANT CONNECT ON DATABASE semaphore TO cnpg_metrics_exporter;
   managed:
     roles:
     - name: pgadmin_monitor
@@ -63,8 +62,7 @@ spec:
     - hostnossl all all 0.0.0.0/0 reject
     - hostnossl all all ::/0 reject
   monitoring:
+    disableDefaultQueries: true
     customQueriesConfigMap:
-    - name: cnpg-default-monitoring
-      key: queries
     - name: postgresql-monitoring-queries
       key: queries.yaml
