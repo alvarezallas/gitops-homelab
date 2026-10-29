@@ -18,7 +18,7 @@ spec:
   syncPolicy:
     syncOptions:
     - ServerSideApply=true
-    - ClientSideApplyMigration=false
+    - DisableClientSideApplyMigration=true
     - FailOnSharedResource=true
   revisionHistoryLimit: 10
   ignoreDifferences:

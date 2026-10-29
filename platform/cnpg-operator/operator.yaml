@@ -12,7 +12,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false,ServerSideApply=true,DisableClientSideApplyMigration=true
   name: backups.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -539,7 +539,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false,ServerSideApply=true,DisableClientSideApplyMigration=true
   name: clusterimagecatalogs.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -820,7 +820,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false,ServerSideApply=true,DisableClientSideApplyMigration=true
   name: clusters.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -11574,7 +11574,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false,ServerSideApply=true,DisableClientSideApplyMigration=true
   name: databaseroles.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -11971,7 +11971,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false,ServerSideApply=true,DisableClientSideApplyMigration=true
   name: databases.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -12665,7 +12665,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false,ServerSideApply=true,DisableClientSideApplyMigration=true
   name: failoverquorums.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -12755,7 +12755,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false,ServerSideApply=true,DisableClientSideApplyMigration=true
   name: imagecatalogs.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -13035,7 +13035,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false,ServerSideApply=true,DisableClientSideApplyMigration=true
   name: poolers.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -13489,10 +13489,9 @@ spec:
                     - name
                     type: object
                   clientCASecret:
-                    description: 'ClientCASecret provides PgBouncerâ€™s client_tls_ca_file,
-                      the root
-
-                      CA for validating client certificates'
+                    description: "ClientCASecret provides PgBouncer\xC3\xA2\xE2\u201A\
+                      \xAC\xE2\u201E\xA2s client_tls_ca_file, the root\nCA for validating\
+                      \ client certificates"
                     properties:
                       name:
                         description: Name of the referent.
@@ -13501,11 +13500,9 @@ spec:
                     - name
                     type: object
                   clientTLSSecret:
-                    description: 'ClientTLSSecret provides PgBouncerâ€™s client_tls_key_file
-                      (private key)
-
-                      and client_tls_cert_file (certificate) used to accept client
-                      connections'
+                    description: "ClientTLSSecret provides PgBouncer\xC3\xA2\xE2\u201A\
+                      \xAC\xE2\u201E\xA2s client_tls_key_file (private key)\nand client_tls_cert_file\
+                      \ (certificate) used to accept client connections"
                     properties:
                       name:
                         description: Name of the referent.
@@ -13597,10 +13594,9 @@ spec:
                     - transaction
                     type: string
                   serverCASecret:
-                    description: 'ServerCASecret provides PgBouncerâ€™s server_tls_ca_file,
-                      the root
-
-                      CA for validating PostgreSQL certificates'
+                    description: "ServerCASecret provides PgBouncer\xC3\xA2\xE2\u201A\
+                      \xAC\xE2\u201E\xA2s server_tls_ca_file, the root\nCA for validating\
+                      \ PostgreSQL certificates"
                     properties:
                       name:
                         description: Name of the referent.
@@ -27292,7 +27288,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false,ServerSideApply=true,DisableClientSideApplyMigration=true
   name: publications.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -27513,7 +27509,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false,ServerSideApply=true,DisableClientSideApplyMigration=true
   name: scheduledbackups.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -27759,7 +27755,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.22.0
-    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false,ServerSideApply=true,DisableClientSideApplyMigration=true
   name: subscriptions.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
