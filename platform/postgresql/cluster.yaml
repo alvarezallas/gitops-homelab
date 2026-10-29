@@ -59,3 +59,7 @@ spec:
     pg_hba:
     - hostnossl all all 0.0.0.0/0 reject
     - hostnossl all all ::/0 reject
+  monitoring:
+    customQueriesConfigMap:
+    - name: postgresql-monitoring-queries
+      key: queries.yaml

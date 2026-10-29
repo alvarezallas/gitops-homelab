@@ -4,2053 +4,781 @@ metadata:
   name: grafana-cluster-dashboard
   namespace: monitoring
 data:
-  cluster-overview.json: |
-    {
-      "id": null,
-      "uid": "bearsfamily-cluster",
-      "title": "Bearsfamily · Estado completo del clúster",
-      "description": "Estado absoluto actual de los cuatro nodos e histórico por pod. Gestión GitOps. Sin métricas ficticias; el NAS externo requiere instrumentación independiente.",
-      "tags": [
-        "homelab",
-        "kubernetes",
-        "bearsfamily"
-      ],
-      "timezone": "browser",
-      "schemaVersion": 39,
-      "version": 2,
-      "refresh": "30s",
-      "time": {
-        "from": "now-1h",
-        "to": "now"
-      },
-      "timepicker": {
-        "refresh_intervals": [
-          "30s",
-          "1m",
-          "5m"
-        ]
-      },
-      "editable": false,
-      "graphTooltip": 1,
-      "templating": {
-        "list": [
-          {
-            "name": "namespace",
-            "label": "Namespace",
-            "type": "query",
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "query": "label_values(kube_pod_info, namespace)",
-            "definition": "label_values(kube_pod_info, namespace)",
-            "refresh": 2,
-            "sort": 1,
-            "multi": true,
-            "includeAll": true,
-            "allValue": ".*",
-            "current": {
-              "selected": true,
-              "text": "All",
-              "value": "$__all"
-            },
-            "options": []
-          },
-          {
-            "name": "pod",
-            "label": "Pod",
-            "type": "query",
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "query": "label_values(kube_pod_info{namespace=~\"${namespace:regex}\"}, pod)",
-            "definition": "label_values(kube_pod_info{namespace=~\"${namespace:regex}\"}, pod)",
-            "refresh": 2,
-            "sort": 1,
-            "multi": true,
-            "includeAll": true,
-            "allValue": ".*",
-            "current": {
-              "selected": true,
-              "text": "All",
-              "value": "$__all"
-            },
-            "options": []
-          }
-        ]
-      },
-      "annotations": {
-        "list": []
-      },
-      "panels": [
-        {
-          "id": 1,
-          "type": "row",
-          "title": "01 · Clúster ahora — valores absolutos, actualización cada 30 s",
-          "description": "",
-          "gridPos": {
-            "x": 0,
-            "y": 0,
-            "w": 24,
-            "h": 1
-          },
-          "collapsed": false,
-          "panels": []
-        },
-        {
-          "id": 2,
-          "type": "stat",
-          "title": "CPU utilizada · núcleos",
-          "description": "Media de 1 minuto: núcleos ocupados; no porcentaje. Incluye espera de I/O, excluye guest para no duplicar.",
-          "gridPos": {
-            "x": 0,
-            "y": 1,
-            "w": 4,
-            "h": 4
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(rate(node_cpu_seconds_total{job=\"nodes\",mode!~\"idle|guest|guest_nice\"}[1m]))",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "cores",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 3,
-          "type": "stat",
-          "title": "RAM utilizada",
-          "description": "MemTotal − MemAvailable de los cuatro nodos.",
-          "gridPos": {
-            "x": 4,
-            "y": 1,
-            "w": 4,
-            "h": 4
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(node_memory_MemTotal_bytes{job=\"nodes\"} - node_memory_MemAvailable_bytes{job=\"nodes\"})",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "bytes",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 4,
-          "type": "stat",
-          "title": "Disco utilizado · raíces",
-          "description": "Suma size − free de / en los cuatro nodos. Solo discos locales del clúster; no los discos del NAS.",
-          "gridPos": {
-            "x": 8,
-            "y": 1,
-            "w": 4,
-            "h": 4
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(node_filesystem_size_bytes{job=\"nodes\",mountpoint=\"/\",fstype!~\"tmpfs|overlay|squashfs|nsfs\"} - node_filesystem_free_bytes{job=\"nodes\",mountpoint=\"/\",fstype!~\"tmpfs|overlay|squashfs|nsfs\"})",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "bytes",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 5,
-          "type": "stat",
-          "title": "Red · recepción",
-          "description": "Suma de bytes/s recibidos en interfaces físicas. Incluye tráfico LAN entre nodos; no equivale a consumo de Internet.",
-          "gridPos": {
-            "x": 12,
-            "y": 1,
-            "w": 4,
-            "h": 4
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(rate(node_network_receive_bytes_total{job=\"nodes\",device=~\"eth[0-9]+|en.*|wlan[0-9]+\"}[1m]))",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "Bps",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 6,
-          "type": "stat",
-          "title": "Red · transmisión",
-          "description": "Suma de bytes/s transmitidos en interfaces físicas. Se excluyen loopback y redes virtuales.",
-          "gridPos": {
-            "x": 16,
-            "y": 1,
-            "w": 4,
-            "h": 4
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(rate(node_network_transmit_bytes_total{job=\"nodes\",device=~\"eth[0-9]+|en.*|wlan[0-9]+\"}[1m]))",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "Bps",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 7,
-          "type": "stat",
-          "title": "Nodos Ready",
-          "description": "Estado reportado por Kubernetes.",
-          "gridPos": {
-            "x": 20,
-            "y": 1,
-            "w": 4,
-            "h": 4
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(kube_node_status_condition{condition=\"Ready\",status=\"true\"})",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 33,
-          "type": "stat",
-          "title": "Pods en pi5",
-          "description": "Pods activos asignados a pi5. Incluye Pending, Running y Unknown; excluye Succeeded/Failed. No depende de los filtros de históricos.",
-          "gridPos": {
-            "x": 0,
-            "y": 5,
-            "w": 6,
-            "h": 4
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "count(kube_pod_info{node=\"pi5\"} and on(namespace,pod) (kube_pod_status_phase{phase=~\"Pending|Running|Unknown\"} == 1)) or on() (0 * max(kube_node_info{node=\"pi5\"}))",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 0,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 34,
-          "type": "stat",
-          "title": "Pods en pi3b1",
-          "description": "Pods activos asignados a pi3b1. Incluye Pending, Running y Unknown; excluye Succeeded/Failed. No depende de los filtros de históricos.",
-          "gridPos": {
-            "x": 6,
-            "y": 5,
-            "w": 6,
-            "h": 4
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "count(kube_pod_info{node=\"pi3b1\"} and on(namespace,pod) (kube_pod_status_phase{phase=~\"Pending|Running|Unknown\"} == 1)) or on() (0 * max(kube_node_info{node=\"pi3b1\"}))",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 0,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 35,
-          "type": "stat",
-          "title": "Pods en pi3b2",
-          "description": "Pods activos asignados a pi3b2. Incluye Pending, Running y Unknown; excluye Succeeded/Failed. No depende de los filtros de históricos.",
-          "gridPos": {
-            "x": 12,
-            "y": 5,
-            "w": 6,
-            "h": 4
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "count(kube_pod_info{node=\"pi3b2\"} and on(namespace,pod) (kube_pod_status_phase{phase=~\"Pending|Running|Unknown\"} == 1)) or on() (0 * max(kube_node_info{node=\"pi3b2\"}))",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 0,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 36,
-          "type": "stat",
-          "title": "Pods en pi3b3",
-          "description": "Pods activos asignados a pi3b3. Incluye Pending, Running y Unknown; excluye Succeeded/Failed. No depende de los filtros de históricos.",
-          "gridPos": {
-            "x": 18,
-            "y": 5,
-            "w": 6,
-            "h": 4
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "count(kube_pod_info{node=\"pi3b3\"} and on(namespace,pod) (kube_pod_status_phase{phase=~\"Pending|Running|Unknown\"} == 1)) or on() (0 * max(kube_node_info{node=\"pi3b3\"}))",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 0,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 8,
-          "type": "stat",
-          "title": "CPU total",
-          "description": "",
-          "gridPos": {
-            "x": 0,
-            "y": 9,
-            "w": 4,
-            "h": 3
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "count(node_cpu_seconds_total{job=\"nodes\",mode=\"idle\"})",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "cores",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 9,
-          "type": "stat",
-          "title": "RAM total",
-          "description": "",
-          "gridPos": {
-            "x": 4,
-            "y": 9,
-            "w": 4,
-            "h": 3
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(node_memory_MemTotal_bytes{job=\"nodes\"})",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "bytes",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 10,
-          "type": "stat",
-          "title": "Disco total · raíces",
-          "description": "",
-          "gridPos": {
-            "x": 8,
-            "y": 9,
-            "w": 4,
-            "h": 3
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(node_filesystem_size_bytes{job=\"nodes\",mountpoint=\"/\",fstype!~\"tmpfs|overlay|squashfs|nsfs\"})",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "bytes",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 11,
-          "type": "stat",
-          "title": "Pods en ejecución",
-          "description": "",
-          "gridPos": {
-            "x": 12,
-            "y": 9,
-            "w": 4,
-            "h": 3
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(kube_pod_status_phase{phase=\"Running\"})",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 12,
-          "type": "stat",
-          "title": "Pods activos no Ready",
-          "description": "",
-          "gridPos": {
-            "x": 16,
-            "y": 9,
-            "w": 4,
-            "h": 3
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum((max by(namespace,pod)(kube_pod_status_phase{phase=~\"Pending|Running|Unknown\"}) == 1) unless on(namespace,pod) (kube_pod_status_ready{condition=\"true\"} == 1)) or vector(0)",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 13,
-          "type": "stat",
-          "title": "Reinicios · última hora",
-          "description": "",
-          "gridPos": {
-            "x": 20,
-            "y": 9,
-            "w": 4,
-            "h": 3
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(increase(kube_pod_container_status_restarts_total[1h])) or vector(0)",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 14,
-          "type": "row",
-          "title": "02 · Estado y capacidad de los nodos",
-          "description": "",
-          "gridPos": {
-            "x": 0,
-            "y": 12,
-            "w": 24,
-            "h": 1
-          },
-          "collapsed": false,
-          "panels": []
-        },
-        {
-          "id": 15,
-          "type": "bargauge",
-          "title": "CPU por nodo · núcleos",
-          "description": "",
-          "gridPos": {
-            "x": 0,
-            "y": 13,
-            "w": 6,
-            "h": 6
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum by(instance)(rate(node_cpu_seconds_total{job=\"nodes\",mode!~\"idle|guest|guest_nice\"}[1m])) * on(instance) group_left(nodename) node_uname_info{job=\"nodes\"}",
-              "legendFormat": "{{nodename}}",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "cores",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "horizontal",
-            "displayMode": "basic",
-            "showUnfilled": true,
-            "minVizHeight": 10,
-            "minVizWidth": 0
-          }
-        },
-        {
-          "id": 16,
-          "type": "bargauge",
-          "title": "RAM por nodo",
-          "description": "",
-          "gridPos": {
-            "x": 6,
-            "y": 13,
-            "w": 6,
-            "h": 6
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "(node_memory_MemTotal_bytes{job=\"nodes\"} - node_memory_MemAvailable_bytes{job=\"nodes\"}) * on(instance) group_left(nodename) node_uname_info{job=\"nodes\"}",
-              "legendFormat": "{{nodename}}",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "bytes",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "horizontal",
-            "displayMode": "basic",
-            "showUnfilled": true,
-            "minVizHeight": 10,
-            "minVizWidth": 0
-          }
-        },
-        {
-          "id": 17,
-          "type": "bargauge",
-          "title": "Disco libre · raíz por nodo",
-          "description": "",
-          "gridPos": {
-            "x": 12,
-            "y": 13,
-            "w": 6,
-            "h": 6
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "node_filesystem_avail_bytes{job=\"nodes\",mountpoint=\"/\",fstype!~\"tmpfs|overlay|squashfs|nsfs\"} * on(instance) group_left(nodename) node_uname_info{job=\"nodes\"}",
-              "legendFormat": "{{nodename}}",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "bytes",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "horizontal",
-            "displayMode": "basic",
-            "showUnfilled": true,
-            "minVizHeight": 10,
-            "minVizWidth": 0
-          }
-        },
-        {
-          "id": 18,
-          "type": "bargauge",
-          "title": "Red recibida · por nodo",
-          "description": "",
-          "gridPos": {
-            "x": 18,
-            "y": 13,
-            "w": 6,
-            "h": 6
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum by(instance)(rate(node_network_receive_bytes_total{job=\"nodes\",device=~\"eth[0-9]+|en.*|wlan[0-9]+\"}[1m])) * on(instance) group_left(nodename) node_uname_info{job=\"nodes\"}",
-              "legendFormat": "{{nodename}}",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "Bps",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos"
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "horizontal",
-            "displayMode": "basic",
-            "showUnfilled": true,
-            "minVizHeight": 10,
-            "minVizWidth": 0
-          }
-        },
-        {
-          "id": 19,
-          "type": "stat",
-          "title": "Objetivos Prometheus caídos",
-          "description": "",
-          "gridPos": {
-            "x": 0,
-            "y": 19,
-            "w": 6,
-            "h": 3
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(up == bool 0)",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 2,
-              "color": {
-                "mode": "thresholds"
-              },
-              "noValue": "Sin datos",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 1
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 20,
-          "type": "stat",
-          "title": "PVC sin enlazar",
-          "description": "",
-          "gridPos": {
-            "x": 6,
-            "y": 19,
-            "w": 6,
-            "h": 3
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(kube_persistentvolumeclaim_status_phase{phase!=\"Bound\"} == 1) or vector(0)",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 2,
-              "color": {
-                "mode": "thresholds"
-              },
-              "noValue": "Sin datos",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 1
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 21,
-          "type": "stat",
-          "title": "Pods pendientes",
-          "description": "",
-          "gridPos": {
-            "x": 12,
-            "y": 19,
-            "w": 6,
-            "h": 3
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(kube_pod_status_phase{phase=\"Pending\"})",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 2,
-              "color": {
-                "mode": "thresholds"
-              },
-              "noValue": "Sin datos",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 1
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 22,
-          "type": "stat",
-          "title": "Nodos con presión",
-          "description": "",
-          "gridPos": {
-            "x": 18,
-            "y": 19,
-            "w": 6,
-            "h": 3
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum(kube_node_status_condition{condition=~\"MemoryPressure|DiskPressure|PIDPressure\",status=\"true\"})",
-              "legendFormat": "",
-              "range": false,
-              "instant": true,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 2,
-              "color": {
-                "mode": "thresholds"
-              },
-              "noValue": "Sin datos",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 1
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "orientation": "auto",
-            "textMode": "auto",
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "wideLayout": true
-          }
-        },
-        {
-          "id": 23,
-          "type": "row",
-          "title": "03 · Consumo histórico por pod — filtros Namespace y Pod",
-          "description": "",
-          "gridPos": {
-            "x": 0,
-            "y": 22,
-            "w": 24,
-            "h": 1
-          },
-          "collapsed": false,
-          "panels": []
-        },
-        {
-          "id": 24,
-          "type": "timeseries",
-          "title": "CPU por pod · mCPU",
-          "description": "1000 mCPU = un núcleo. Solo contenedores reales; excluye agregados y sandbox. Histórico disponible desde la incorporación de cAdvisor.",
-          "gridPos": {
-            "x": 0,
-            "y": 23,
-            "w": 12,
-            "h": 9
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "1000 * sum by(namespace,pod)(rate(container_cpu_usage_seconds_total{job=\"kubelet-cadvisor\",namespace=~\"${namespace:regex}\",pod=~\"${pod:regex}\",pod!=\"\",container!=\"\",container!=\"POD\"}[$__rate_interval]))",
-              "legendFormat": "{{namespace}} / {{pod}}",
-              "range": true,
-              "instant": false,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "suffix: mCPU",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos",
-              "custom": {
-                "drawStyle": "line",
-                "lineInterpolation": "smooth",
-                "lineWidth": 1,
-                "fillOpacity": 8,
-                "showPoints": "never",
-                "spanNulls": false,
-                "axisPlacement": "auto",
-                "stacking": {
-                  "mode": "none",
-                  "group": "A"
-                }
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "legend": {
-              "displayMode": "table",
-              "placement": "right",
-              "calcs": [
-                "lastNotNull",
-                "max"
-              ],
-              "showLegend": true,
-              "width": 250
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          }
-        },
-        {
-          "id": 25,
-          "type": "timeseries",
-          "title": "RAM por pod · working set",
-          "description": "Memoria working set sumada por pod. No es el valor del límite o request.",
-          "gridPos": {
-            "x": 12,
-            "y": 23,
-            "w": 12,
-            "h": 9
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum by(namespace,pod)(container_memory_working_set_bytes{job=\"kubelet-cadvisor\",namespace=~\"${namespace:regex}\",pod=~\"${pod:regex}\",pod!=\"\",container!=\"\",container!=\"POD\"})",
-              "legendFormat": "{{namespace}} / {{pod}}",
-              "range": true,
-              "instant": false,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "bytes",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos",
-              "custom": {
-                "drawStyle": "line",
-                "lineInterpolation": "smooth",
-                "lineWidth": 1,
-                "fillOpacity": 8,
-                "showPoints": "never",
-                "spanNulls": false,
-                "axisPlacement": "auto",
-                "stacking": {
-                  "mode": "none",
-                  "group": "A"
-                }
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "legend": {
-              "displayMode": "table",
-              "placement": "right",
-              "calcs": [
-                "lastNotNull",
-                "max"
-              ],
-              "showLegend": true,
-              "width": 250
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          }
-        },
-        {
-          "id": 26,
-          "type": "timeseries",
-          "title": "Red por pod · recepción",
-          "description": "Deduplicada por pod e interfaz. Se excluyen pods hostNetwork: comparten la red del nodo y no se puede atribuir su tráfico por separado.",
-          "gridPos": {
-            "x": 0,
-            "y": 32,
-            "w": 12,
-            "h": 8
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum by(namespace,pod)(max by(namespace,pod,interface)(rate(container_network_receive_bytes_total{job=\"kubelet-cadvisor\",namespace=~\"${namespace:regex}\",pod=~\"${pod:regex}\",pod!=\"\",interface!=\"lo\"}[$__rate_interval]))) * on(namespace,pod) group_left() max by(namespace,pod)(kube_pod_info{host_network=\"false\"})",
-              "legendFormat": "{{namespace}} / {{pod}}",
-              "range": true,
-              "instant": false,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "Bps",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos",
-              "custom": {
-                "drawStyle": "line",
-                "lineInterpolation": "smooth",
-                "lineWidth": 1,
-                "fillOpacity": 8,
-                "showPoints": "never",
-                "spanNulls": false,
-                "axisPlacement": "auto",
-                "stacking": {
-                  "mode": "none",
-                  "group": "A"
-                }
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "legend": {
-              "displayMode": "table",
-              "placement": "right",
-              "calcs": [
-                "lastNotNull",
-                "max"
-              ],
-              "showLegend": true,
-              "width": 250
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          }
-        },
-        {
-          "id": 27,
-          "type": "timeseries",
-          "title": "Red por pod · transmisión",
-          "description": "Mismas exclusiones que recepción. Ver panel de nodos para red de pods hostNetwork.",
-          "gridPos": {
-            "x": 12,
-            "y": 32,
-            "w": 12,
-            "h": 8
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum by(namespace,pod)(max by(namespace,pod,interface)(rate(container_network_transmit_bytes_total{job=\"kubelet-cadvisor\",namespace=~\"${namespace:regex}\",pod=~\"${pod:regex}\",pod!=\"\",interface!=\"lo\"}[$__rate_interval]))) * on(namespace,pod) group_left() max by(namespace,pod)(kube_pod_info{host_network=\"false\"})",
-              "legendFormat": "{{namespace}} / {{pod}}",
-              "range": true,
-              "instant": false,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "Bps",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos",
-              "custom": {
-                "drawStyle": "line",
-                "lineInterpolation": "smooth",
-                "lineWidth": 1,
-                "fillOpacity": 8,
-                "showPoints": "never",
-                "spanNulls": false,
-                "axisPlacement": "auto",
-                "stacking": {
-                  "mode": "none",
-                  "group": "A"
-                }
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "legend": {
-              "displayMode": "table",
-              "placement": "right",
-              "calcs": [
-                "lastNotNull",
-                "max"
-              ],
-              "showLegend": true,
-              "width": 250
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          }
-        },
-        {
-          "id": 28,
-          "type": "timeseries",
-          "title": "Disco por pod · lectura",
-          "description": "I/O de bloques atribuido por cAdvisor al contenedor; no representa espacio ocupado ni tráfico NFS, y puede ser cero o no estar disponible para algunos pods.",
-          "gridPos": {
-            "x": 0,
-            "y": 40,
-            "w": 12,
-            "h": 8
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum by(namespace,pod)(rate(container_fs_reads_bytes_total{job=\"kubelet-cadvisor\",namespace=~\"${namespace:regex}\",pod=~\"${pod:regex}\",pod!=\"\",container!=\"\",container!=\"POD\"}[$__rate_interval]))",
-              "legendFormat": "{{namespace}} / {{pod}}",
-              "range": true,
-              "instant": false,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "Bps",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos",
-              "custom": {
-                "drawStyle": "line",
-                "lineInterpolation": "smooth",
-                "lineWidth": 1,
-                "fillOpacity": 8,
-                "showPoints": "never",
-                "spanNulls": false,
-                "axisPlacement": "auto",
-                "stacking": {
-                  "mode": "none",
-                  "group": "A"
-                }
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "legend": {
-              "displayMode": "table",
-              "placement": "right",
-              "calcs": [
-                "lastNotNull",
-                "max"
-              ],
-              "showLegend": true,
-              "width": 250
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          }
-        },
-        {
-          "id": 29,
-          "type": "timeseries",
-          "title": "Disco por pod · escritura",
-          "description": "I/O de bloques atribuido por cAdvisor al contenedor; no representa espacio ocupado ni tráfico NFS, y puede ser cero o no estar disponible para algunos pods.",
-          "gridPos": {
-            "x": 12,
-            "y": 40,
-            "w": 12,
-            "h": 8
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum by(namespace,pod)(rate(container_fs_writes_bytes_total{job=\"kubelet-cadvisor\",namespace=~\"${namespace:regex}\",pod=~\"${pod:regex}\",pod!=\"\",container!=\"\",container!=\"POD\"}[$__rate_interval]))",
-              "legendFormat": "{{namespace}} / {{pod}}",
-              "range": true,
-              "instant": false,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "Bps",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos",
-              "custom": {
-                "drawStyle": "line",
-                "lineInterpolation": "smooth",
-                "lineWidth": 1,
-                "fillOpacity": 8,
-                "showPoints": "never",
-                "spanNulls": false,
-                "axisPlacement": "auto",
-                "stacking": {
-                  "mode": "none",
-                  "group": "A"
-                }
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "legend": {
-              "displayMode": "table",
-              "placement": "right",
-              "calcs": [
-                "lastNotNull",
-                "max"
-              ],
-              "showLegend": true,
-              "width": 250
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          }
-        },
-        {
-          "id": 30,
-          "type": "row",
-          "title": "04 · Almacenamiento y reinicios por pod",
-          "description": "",
-          "gridPos": {
-            "x": 0,
-            "y": 48,
-            "w": 24,
-            "h": 1
-          },
-          "collapsed": false,
-          "panels": []
-        },
-        {
-          "id": 31,
-          "type": "timeseries",
-          "title": "Reinicios por pod · ventana de 1 h",
-          "description": "",
-          "gridPos": {
-            "x": 0,
-            "y": 49,
-            "w": 12,
-            "h": 7
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum by(namespace,pod)(increase(kube_pod_container_status_restarts_total{namespace=~\"${namespace:regex}\",pod=~\"${pod:regex}\"}[1h]))",
-              "legendFormat": "{{namespace}} / {{pod}}",
-              "range": true,
-              "instant": false,
-              "editorMode": "code"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "short",
-              "decimals": 2,
-              "color": {
-                "mode": "palette-classic"
-              },
-              "noValue": "Sin datos",
-              "custom": {
-                "drawStyle": "line",
-                "lineInterpolation": "smooth",
-                "lineWidth": 1,
-                "fillOpacity": 8,
-                "showPoints": "never",
-                "spanNulls": false,
-                "axisPlacement": "auto",
-                "stacking": {
-                  "mode": "none",
-                  "group": "A"
-                }
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "legend": {
-              "displayMode": "table",
-              "placement": "right",
-              "calcs": [
-                "lastNotNull",
-                "max"
-              ],
-              "showLegend": true,
-              "width": 250
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          }
-        },
-        {
-          "id": 32,
-          "type": "text",
-          "title": "Alcance de las métricas",
-          "description": "",
-          "gridPos": {
-            "x": 12,
-            "y": 49,
-            "w": 12,
-            "h": 7
-          },
-          "options": {
-            "mode": "markdown",
-            "content": "**Actualización:** cada 30 s, con tasas promediadas sobre ventanas de muestreo.\n\n**Discos superiores:** raíces `/` de los cuatro nodos. El NAS `.164` está fuera del clúster y no tiene exporter en este dashboard.\n\n**Históricos por pod:** empiezan al activar cAdvisor. CPU/RAM desde contenedores; red excluye `hostNetwork`.\n\n**Disco por pod:** I/O de bloques, no espacio ocupado. Los kubelets actuales no exponen `container_fs_usage_bytes`; tampoco hay medición de capacidad usada del PVC NFS. No se inventan ceros ni capacidades reales a partir de requests.\n\n**Persistencia:** Prometheus conserva 15 días. Panel administrado desde GitOps; namespace/pod solo filtran los paneles históricos."
-          }
-        }
-      ],
-      "links": [
-        {
-          "title": "Prometheus",
-          "type": "link",
-          "url": "https://prometheus.bearsfamily.aa",
-          "targetBlank": true
-        },
-        {
-          "title": "Argo CD",
-          "type": "link",
-          "url": "https://argocd.bearsfamily.aa",
-          "targetBlank": true
-        }
-      ]
-    }
+  cluster-overview.json: "{\n  \"id\": null,\n  \"uid\": \"bearsfamily-cluster\",\n\
+    \  \"title\": \"Bearsfamily Â· Estado completo del clÃºster\",\n  \"description\"\
+    : \"Estado absoluto actual de los cuatro nodos e histÃ³rico por pod. GestiÃ³n\
+    \ GitOps. Sin mÃ©tricas ficticias; el NAS externo requiere instrumentaciÃ³n independiente.\"\
+    ,\n  \"tags\": [\n    \"homelab\",\n    \"kubernetes\",\n    \"bearsfamily\"\n\
+    \  ],\n  \"timezone\": \"browser\",\n  \"schemaVersion\": 39,\n  \"version\":\
+    \ 2,\n  \"refresh\": \"30s\",\n  \"time\": {\n    \"from\": \"now-1h\",\n    \"\
+    to\": \"now\"\n  },\n  \"timepicker\": {\n    \"refresh_intervals\": [\n     \
+    \ \"30s\",\n      \"1m\",\n      \"5m\"\n    ]\n  },\n  \"editable\": false,\n\
+    \  \"graphTooltip\": 1,\n  \"templating\": {\n    \"list\": [\n      {\n     \
+    \   \"name\": \"namespace\",\n        \"label\": \"Namespace\",\n        \"type\"\
+    : \"query\",\n        \"datasource\": {\n          \"type\": \"prometheus\",\n\
+    \          \"uid\": \"prometheus\"\n        },\n        \"query\": \"label_values(kube_pod_info,\
+    \ namespace)\",\n        \"definition\": \"label_values(kube_pod_info, namespace)\"\
+    ,\n        \"refresh\": 2,\n        \"sort\": 1,\n        \"multi\": true,\n \
+    \       \"includeAll\": true,\n        \"allValue\": \".*\",\n        \"current\"\
+    : {\n          \"selected\": true,\n          \"text\": \"All\",\n          \"\
+    value\": \"$__all\"\n        },\n        \"options\": []\n      },\n      {\n\
+    \        \"name\": \"pod\",\n        \"label\": \"Pod\",\n        \"type\": \"\
+    query\",\n        \"datasource\": {\n          \"type\": \"prometheus\",\n   \
+    \       \"uid\": \"prometheus\"\n        },\n        \"query\": \"label_values(kube_pod_info{namespace=~\\\
+    \"${namespace:regex}\\\"}, pod)\",\n        \"definition\": \"label_values(kube_pod_info{namespace=~\\\
+    \"${namespace:regex}\\\"}, pod)\",\n        \"refresh\": 2,\n        \"sort\"\
+    : 1,\n        \"multi\": true,\n        \"includeAll\": true,\n        \"allValue\"\
+    : \".*\",\n        \"current\": {\n          \"selected\": true,\n          \"\
+    text\": \"All\",\n          \"value\": \"$__all\"\n        },\n        \"options\"\
+    : []\n      }\n    ]\n  },\n  \"annotations\": {\n    \"list\": []\n  },\n  \"\
+    panels\": [\n    {\n      \"id\": 1,\n      \"type\": \"row\",\n      \"title\"\
+    : \"01 Â· ClÃºster ahora â€” valores absolutos, actualizaciÃ³n cada 30 s\",\n\
+    \      \"description\": \"\",\n      \"gridPos\": {\n        \"x\": 0,\n     \
+    \   \"y\": 0,\n        \"w\": 24,\n        \"h\": 1\n      },\n      \"collapsed\"\
+    : false,\n      \"panels\": []\n    },\n    {\n      \"id\": 2,\n      \"type\"\
+    : \"stat\",\n      \"title\": \"CPU utilizada Â· nÃºcleos\",\n      \"description\"\
+    : \"Media de 1 minuto: nÃºcleos ocupados; no porcentaje. Incluye espera de I/O,\
+    \ excluye guest para no duplicar.\",\n      \"gridPos\": {\n        \"x\": 0,\n\
+    \        \"y\": 1,\n        \"w\": 4,\n        \"h\": 4\n      },\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n        \
+    \  \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\"\
+    : \"prometheus\"\n          },\n          \"expr\": \"sum(rate(node_cpu_seconds_total{job=\\\
+    \"nodes\\\",mode!~\\\"idle|guest|guest_nice\\\"}[1m]))\",\n          \"legendFormat\"\
+    : \"\",\n          \"range\": false,\n          \"instant\": true,\n         \
+    \ \"editorMode\": \"code\"\n        }\n      ],\n      \"fieldConfig\": {\n  \
+    \      \"defaults\": {\n          \"unit\": \"cores\",\n          \"decimals\"\
+    : 2,\n          \"color\": {\n            \"mode\": \"palette-classic\"\n    \
+    \      },\n          \"noValue\": \"Sin datos\"\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"reduceOptions\": {\n         \
+    \ \"calcs\": [\n            \"lastNotNull\"\n          ],\n          \"fields\"\
+    : \"\",\n          \"values\": false\n        },\n        \"orientation\": \"\
+    auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\",\n\
+    \        \"graphMode\": \"none\",\n        \"justifyMode\": \"auto\",\n      \
+    \  \"wideLayout\": true\n      }\n    },\n    {\n      \"id\": 3,\n      \"type\"\
+    : \"stat\",\n      \"title\": \"RAM utilizada\",\n      \"description\": \"MemTotal\
+    \ âˆ’ MemAvailable de los cuatro nodos.\",\n      \"gridPos\": {\n        \"x\"\
+    : 4,\n        \"y\": 1,\n        \"w\": 4,\n        \"h\": 4\n      },\n     \
+    \ \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\
+    \n      },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n   \
+    \       \"datasource\": {\n            \"type\": \"prometheus\",\n           \
+    \ \"uid\": \"prometheus\"\n          },\n          \"expr\": \"sum(node_memory_MemTotal_bytes{job=\\\
+    \"nodes\\\"} - node_memory_MemAvailable_bytes{job=\\\"nodes\\\"})\",\n       \
+    \   \"legendFormat\": \"\",\n          \"range\": false,\n          \"instant\"\
+    : true,\n          \"editorMode\": \"code\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"bytes\",\n          \"decimals\"\
+    : 2,\n          \"color\": {\n            \"mode\": \"palette-classic\"\n    \
+    \      },\n          \"noValue\": \"Sin datos\"\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"reduceOptions\": {\n         \
+    \ \"calcs\": [\n            \"lastNotNull\"\n          ],\n          \"fields\"\
+    : \"\",\n          \"values\": false\n        },\n        \"orientation\": \"\
+    auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\",\n\
+    \        \"graphMode\": \"none\",\n        \"justifyMode\": \"auto\",\n      \
+    \  \"wideLayout\": true\n      }\n    },\n    {\n      \"id\": 4,\n      \"type\"\
+    : \"stat\",\n      \"title\": \"Disco utilizado Â· raÃ­ces\",\n      \"description\"\
+    : \"Suma size âˆ’ free de / en los cuatro nodos. Solo discos locales del clÃºster;\
+    \ no los discos del NAS.\",\n      \"gridPos\": {\n        \"x\": 8,\n       \
+    \ \"y\": 1,\n        \"w\": 4,\n        \"h\": 4\n      },\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n        \
+    \  \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\"\
+    : \"prometheus\"\n          },\n          \"expr\": \"sum(node_filesystem_size_bytes{job=\\\
+    \"nodes\\\",mountpoint=\\\"/\\\",fstype!~\\\"tmpfs|overlay|squashfs|nsfs\\\"}\
+    \ - node_filesystem_free_bytes{job=\\\"nodes\\\",mountpoint=\\\"/\\\",fstype!~\\\
+    \"tmpfs|overlay|squashfs|nsfs\\\"})\",\n          \"legendFormat\": \"\",\n  \
+    \        \"range\": false,\n          \"instant\": true,\n          \"editorMode\"\
+    : \"code\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"bytes\",\n          \"decimals\": 2,\n          \"\
+    color\": {\n            \"mode\": \"palette-classic\"\n          },\n        \
+    \  \"noValue\": \"Sin datos\"\n        },\n        \"overrides\": []\n      },\n\
+    \      \"options\": {\n        \"reduceOptions\": {\n          \"calcs\": [\n\
+    \            \"lastNotNull\"\n          ],\n          \"fields\": \"\",\n    \
+    \      \"values\": false\n        },\n        \"orientation\": \"auto\",\n   \
+    \     \"textMode\": \"auto\",\n        \"colorMode\": \"value\",\n        \"graphMode\"\
+    : \"none\",\n        \"justifyMode\": \"auto\",\n        \"wideLayout\": true\n\
+    \      }\n    },\n    {\n      \"id\": 5,\n      \"type\": \"stat\",\n      \"\
+    title\": \"Red Â· recepciÃ³n\",\n      \"description\": \"Suma de bytes/s recibidos\
+    \ en interfaces fÃ­sicas. Incluye trÃ¡fico LAN entre nodos; no equivale a consumo\
+    \ de Internet.\",\n      \"gridPos\": {\n        \"x\": 12,\n        \"y\": 1,\n\
+    \        \"w\": 4,\n        \"h\": 4\n      },\n      \"datasource\": {\n    \
+    \    \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n  \
+    \    \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"datasource\"\
+    : {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\
+    \n          },\n          \"expr\": \"sum(rate(node_network_receive_bytes_total{job=\\\
+    \"nodes\\\",device=~\\\"eth[0-9]+|en.*|wlan[0-9]+\\\"}[1m]))\",\n          \"\
+    legendFormat\": \"\",\n          \"range\": false,\n          \"instant\": true,\n\
+    \          \"editorMode\": \"code\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"Bps\",\n          \"decimals\"\
+    : 2,\n          \"color\": {\n            \"mode\": \"palette-classic\"\n    \
+    \      },\n          \"noValue\": \"Sin datos\"\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"reduceOptions\": {\n         \
+    \ \"calcs\": [\n            \"lastNotNull\"\n          ],\n          \"fields\"\
+    : \"\",\n          \"values\": false\n        },\n        \"orientation\": \"\
+    auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\",\n\
+    \        \"graphMode\": \"none\",\n        \"justifyMode\": \"auto\",\n      \
+    \  \"wideLayout\": true\n      }\n    },\n    {\n      \"id\": 6,\n      \"type\"\
+    : \"stat\",\n      \"title\": \"Red Â· transmisiÃ³n\",\n      \"description\"\
+    : \"Suma de bytes/s transmitidos en interfaces fÃ­sicas. Se excluyen loopback\
+    \ y redes virtuales.\",\n      \"gridPos\": {\n        \"x\": 16,\n        \"\
+    y\": 1,\n        \"w\": 4,\n        \"h\": 4\n      },\n      \"datasource\":\
+    \ {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n        \
+    \  \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\"\
+    : \"prometheus\"\n          },\n          \"expr\": \"sum(rate(node_network_transmit_bytes_total{job=\\\
+    \"nodes\\\",device=~\\\"eth[0-9]+|en.*|wlan[0-9]+\\\"}[1m]))\",\n          \"\
+    legendFormat\": \"\",\n          \"range\": false,\n          \"instant\": true,\n\
+    \          \"editorMode\": \"code\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"Bps\",\n          \"decimals\"\
+    : 2,\n          \"color\": {\n            \"mode\": \"palette-classic\"\n    \
+    \      },\n          \"noValue\": \"Sin datos\"\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"reduceOptions\": {\n         \
+    \ \"calcs\": [\n            \"lastNotNull\"\n          ],\n          \"fields\"\
+    : \"\",\n          \"values\": false\n        },\n        \"orientation\": \"\
+    auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\",\n\
+    \        \"graphMode\": \"none\",\n        \"justifyMode\": \"auto\",\n      \
+    \  \"wideLayout\": true\n      }\n    },\n    {\n      \"id\": 7,\n      \"type\"\
+    : \"stat\",\n      \"title\": \"Nodos Ready\",\n      \"description\": \"Estado\
+    \ reportado por Kubernetes.\",\n      \"gridPos\": {\n        \"x\": 20,\n   \
+    \     \"y\": 1,\n        \"w\": 4,\n        \"h\": 4\n      },\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n        \
+    \  \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\"\
+    : \"prometheus\"\n          },\n          \"expr\": \"sum(kube_node_status_condition{condition=\\\
+    \"Ready\\\",status=\\\"true\\\"})\",\n          \"legendFormat\": \"\",\n    \
+    \      \"range\": false,\n          \"instant\": true,\n          \"editorMode\"\
+    : \"code\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"short\",\n          \"decimals\": 2,\n          \"\
+    color\": {\n            \"mode\": \"palette-classic\"\n          },\n        \
+    \  \"noValue\": \"Sin datos\"\n        },\n        \"overrides\": []\n      },\n\
+    \      \"options\": {\n        \"reduceOptions\": {\n          \"calcs\": [\n\
+    \            \"lastNotNull\"\n          ],\n          \"fields\": \"\",\n    \
+    \      \"values\": false\n        },\n        \"orientation\": \"auto\",\n   \
+    \     \"textMode\": \"auto\",\n        \"colorMode\": \"value\",\n        \"graphMode\"\
+    : \"none\",\n        \"justifyMode\": \"auto\",\n        \"wideLayout\": true\n\
+    \      }\n    },\n    {\n      \"id\": 33,\n      \"type\": \"stat\",\n      \"\
+    title\": \"Pods en pi5\",\n      \"description\": \"Pods activos asignados a pi5.\
+    \ Incluye Pending, Running y Unknown; excluye Succeeded/Failed. No depende de\
+    \ los filtros de histÃ³ricos.\",\n      \"gridPos\": {\n        \"x\": 0,\n  \
+    \      \"y\": 5,\n        \"w\": 6,\n        \"h\": 4\n      },\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n        \
+    \  \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\"\
+    : \"prometheus\"\n          },\n          \"expr\": \"count(kube_pod_info{node=\\\
+    \"pi5\\\"} and on(namespace,pod) (kube_pod_status_phase{phase=~\\\"Pending|Running|Unknown\\\
+    \"} == 1)) or on() (0 * max(kube_node_info{node=\\\"pi5\\\"}))\",\n          \"\
+    legendFormat\": \"\",\n          \"range\": false,\n          \"instant\": true,\n\
+    \          \"editorMode\": \"code\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"short\",\n          \"decimals\"\
+    : 0,\n          \"color\": {\n            \"mode\": \"palette-classic\"\n    \
+    \      },\n          \"noValue\": \"Sin datos\"\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"reduceOptions\": {\n         \
+    \ \"calcs\": [\n            \"lastNotNull\"\n          ],\n          \"fields\"\
+    : \"\",\n          \"values\": false\n        },\n        \"orientation\": \"\
+    auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\",\n\
+    \        \"graphMode\": \"none\",\n        \"justifyMode\": \"auto\",\n      \
+    \  \"wideLayout\": true\n      }\n    },\n    {\n      \"id\": 34,\n      \"type\"\
+    : \"stat\",\n      \"title\": \"Pods en pi3b1\",\n      \"description\": \"Pods\
+    \ activos asignados a pi3b1. Incluye Pending, Running y Unknown; excluye Succeeded/Failed.\
+    \ No depende de los filtros de histÃ³ricos.\",\n      \"gridPos\": {\n       \
+    \ \"x\": 6,\n        \"y\": 5,\n        \"w\": 6,\n        \"h\": 4\n      },\n\
+    \      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\":\
+    \ \"prometheus\"\n      },\n      \"targets\": [\n        {\n          \"refId\"\
+    : \"A\",\n          \"datasource\": {\n            \"type\": \"prometheus\",\n\
+    \            \"uid\": \"prometheus\"\n          },\n          \"expr\": \"count(kube_pod_info{node=\\\
+    \"pi3b1\\\"} and on(namespace,pod) (kube_pod_status_phase{phase=~\\\"Pending|Running|Unknown\\\
+    \"} == 1)) or on() (0 * max(kube_node_info{node=\\\"pi3b1\\\"}))\",\n        \
+    \  \"legendFormat\": \"\",\n          \"range\": false,\n          \"instant\"\
+    : true,\n          \"editorMode\": \"code\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"short\",\n          \"decimals\"\
+    : 0,\n          \"color\": {\n            \"mode\": \"palette-classic\"\n    \
+    \      },\n          \"noValue\": \"Sin datos\"\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"reduceOptions\": {\n         \
+    \ \"calcs\": [\n            \"lastNotNull\"\n          ],\n          \"fields\"\
+    : \"\",\n          \"values\": false\n        },\n        \"orientation\": \"\
+    auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\",\n\
+    \        \"graphMode\": \"none\",\n        \"justifyMode\": \"auto\",\n      \
+    \  \"wideLayout\": true\n      }\n    },\n    {\n      \"id\": 35,\n      \"type\"\
+    : \"stat\",\n      \"title\": \"Pods en pi3b2\",\n      \"description\": \"Pods\
+    \ activos asignados a pi3b2. Incluye Pending, Running y Unknown; excluye Succeeded/Failed.\
+    \ No depende de los filtros de histÃ³ricos.\",\n      \"gridPos\": {\n       \
+    \ \"x\": 12,\n        \"y\": 5,\n        \"w\": 6,\n        \"h\": 4\n      },\n\
+    \      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\":\
+    \ \"prometheus\"\n      },\n      \"targets\": [\n        {\n          \"refId\"\
+    : \"A\",\n          \"datasource\": {\n            \"type\": \"prometheus\",\n\
+    \            \"uid\": \"prometheus\"\n          },\n          \"expr\": \"count(kube_pod_info{node=\\\
+    \"pi3b2\\\"} and on(namespace,pod) (kube_pod_status_phase{phase=~\\\"Pending|Running|Unknown\\\
+    \"} == 1)) or on() (0 * max(kube_node_info{node=\\\"pi3b2\\\"}))\",\n        \
+    \  \"legendFormat\": \"\",\n          \"range\": false,\n          \"instant\"\
+    : true,\n          \"editorMode\": \"code\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"short\",\n          \"decimals\"\
+    : 0,\n          \"color\": {\n            \"mode\": \"palette-classic\"\n    \
+    \      },\n          \"noValue\": \"Sin datos\"\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"reduceOptions\": {\n         \
+    \ \"calcs\": [\n            \"lastNotNull\"\n          ],\n          \"fields\"\
+    : \"\",\n          \"values\": false\n        },\n        \"orientation\": \"\
+    auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\",\n\
+    \        \"graphMode\": \"none\",\n        \"justifyMode\": \"auto\",\n      \
+    \  \"wideLayout\": true\n      }\n    },\n    {\n      \"id\": 36,\n      \"type\"\
+    : \"stat\",\n      \"title\": \"Pods en pi3b3\",\n      \"description\": \"Pods\
+    \ activos asignados a pi3b3. Incluye Pending, Running y Unknown; excluye Succeeded/Failed.\
+    \ No depende de los filtros de histÃ³ricos.\",\n      \"gridPos\": {\n       \
+    \ \"x\": 18,\n        \"y\": 5,\n        \"w\": 6,\n        \"h\": 4\n      },\n\
+    \      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\":\
+    \ \"prometheus\"\n      },\n      \"targets\": [\n        {\n          \"refId\"\
+    : \"A\",\n          \"datasource\": {\n            \"type\": \"prometheus\",\n\
+    \            \"uid\": \"prometheus\"\n          },\n          \"expr\": \"count(kube_pod_info{node=\\\
+    \"pi3b3\\\"} and on(namespace,pod) (kube_pod_status_phase{phase=~\\\"Pending|Running|Unknown\\\
+    \"} == 1)) or on() (0 * max(kube_node_info{node=\\\"pi3b3\\\"}))\",\n        \
+    \  \"legendFormat\": \"\",\n          \"range\": false,\n          \"instant\"\
+    : true,\n          \"editorMode\": \"code\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"short\",\n          \"decimals\"\
+    : 0,\n          \"color\": {\n            \"mode\": \"palette-classic\"\n    \
+    \      },\n          \"noValue\": \"Sin datos\"\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"reduceOptions\": {\n         \
+    \ \"calcs\": [\n            \"lastNotNull\"\n          ],\n          \"fields\"\
+    : \"\",\n          \"values\": false\n        },\n        \"orientation\": \"\
+    auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\",\n\
+    \        \"graphMode\": \"none\",\n        \"justifyMode\": \"auto\",\n      \
+    \  \"wideLayout\": true\n      }\n    },\n    {\n      \"id\": 8,\n      \"type\"\
+    : \"stat\",\n      \"title\": \"CPU total\",\n      \"description\": \"\",\n \
+    \     \"gridPos\": {\n        \"x\": 0,\n        \"y\": 9,\n        \"w\": 4,\n\
+    \        \"h\": 3\n      },\n      \"datasource\": {\n        \"type\": \"prometheus\"\
+    ,\n        \"uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n\
+    \          \"refId\": \"A\",\n          \"datasource\": {\n            \"type\"\
+    : \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n       \
+    \   \"expr\": \"count(node_cpu_seconds_total{job=\\\"nodes\\\",mode=\\\"idle\\\
+    \"})\",\n          \"legendFormat\": \"\",\n          \"range\": false,\n    \
+    \      \"instant\": true,\n          \"editorMode\": \"code\"\n        }\n   \
+    \   ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\"\
+    : \"cores\",\n          \"decimals\": 2,\n          \"color\": {\n           \
+    \ \"mode\": \"palette-classic\"\n          },\n          \"noValue\": \"Sin datos\"\
+    \n        },\n        \"overrides\": []\n      },\n      \"options\": {\n    \
+    \    \"reduceOptions\": {\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\",\n          \"values\": false\n   \
+    \     },\n        \"orientation\": \"auto\",\n        \"textMode\": \"auto\",\n\
+    \        \"colorMode\": \"value\",\n        \"graphMode\": \"none\",\n       \
+    \ \"justifyMode\": \"auto\",\n        \"wideLayout\": true\n      }\n    },\n\
+    \    {\n      \"id\": 9,\n      \"type\": \"stat\",\n      \"title\": \"RAM total\"\
+    ,\n      \"description\": \"\",\n      \"gridPos\": {\n        \"x\": 4,\n   \
+    \     \"y\": 9,\n        \"w\": 4,\n        \"h\": 3\n      },\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n        \
+    \  \"datasource\": {\n            \"type\": \"prometheus\",\n            \"uid\"\
+    : \"prometheus\"\n          },\n          \"expr\": \"sum(node_memory_MemTotal_bytes{job=\\\
+    \"nodes\\\"})\",\n          \"legendFormat\": \"\",\n          \"range\": false,\n\
+    \          \"instant\": true,\n          \"editorMode\": \"code\"\n        }\n\
+    \      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\"\
+    : \"bytes\",\n          \"decimals\": 2,\n          \"color\": {\n           \
+    \ \"mode\": \"palette-classic\"\n          },\n          \"noValue\": \"Sin datos\"\
+    \n        },\n        \"overrides\": []\n      },\n      \"options\": {\n    \
+    \    \"reduceOptions\": {\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\",\n          \"values\": false\n   \
+    \     },\n        \"orientation\": \"auto\",\n        \"textMode\": \"auto\",\n\
+    \        \"colorMode\": \"value\",\n        \"graphMode\": \"none\",\n       \
+    \ \"justifyMode\": \"auto\",\n        \"wideLayout\": true\n      }\n    },\n\
+    \    {\n      \"id\": 10,\n      \"type\": \"stat\",\n      \"title\": \"Disco\
+    \ total Â· raÃ­ces\",\n      \"description\": \"\",\n      \"gridPos\": {\n  \
+    \      \"x\": 8,\n        \"y\": 9,\n        \"w\": 4,\n        \"h\": 3\n   \
+    \   },\n      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"\
+    uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n          \"\
+    refId\": \"A\",\n          \"datasource\": {\n            \"type\": \"prometheus\"\
+    ,\n            \"uid\": \"prometheus\"\n          },\n          \"expr\": \"sum(node_filesystem_size_bytes{job=\\\
+    \"nodes\\\",mountpoint=\\\"/\\\",fstype!~\\\"tmpfs|overlay|squashfs|nsfs\\\"})\"\
+    ,\n          \"legendFormat\": \"\",\n          \"range\": false,\n          \"\
+    instant\": true,\n          \"editorMode\": \"code\"\n        }\n      ],\n  \
+    \    \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"bytes\"\
+    ,\n          \"decimals\": 2,\n          \"color\": {\n            \"mode\": \"\
+    palette-classic\"\n          },\n          \"noValue\": \"Sin datos\"\n      \
+    \  },\n        \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\"\
+    : {\n          \"calcs\": [\n            \"lastNotNull\"\n          ],\n     \
+    \     \"fields\": \"\",\n          \"values\": false\n        },\n        \"orientation\"\
+    : \"auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\"\
+    ,\n        \"graphMode\": \"none\",\n        \"justifyMode\": \"auto\",\n    \
+    \    \"wideLayout\": true\n      }\n    },\n    {\n      \"id\": 11,\n      \"\
+    type\": \"stat\",\n      \"title\": \"Pods en ejecuciÃ³n\",\n      \"description\"\
+    : \"\",\n      \"gridPos\": {\n        \"x\": 12,\n        \"y\": 9,\n       \
+    \ \"w\": 4,\n        \"h\": 3\n      },\n      \"datasource\": {\n        \"type\"\
+    : \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"datasource\": {\n   \
+    \         \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n   \
+    \       },\n          \"expr\": \"sum(kube_pod_status_phase{phase=\\\"Running\\\
+    \"})\",\n          \"legendFormat\": \"\",\n          \"range\": false,\n    \
+    \      \"instant\": true,\n          \"editorMode\": \"code\"\n        }\n   \
+    \   ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\"\
+    : \"short\",\n          \"decimals\": 2,\n          \"color\": {\n           \
+    \ \"mode\": \"palette-classic\"\n          },\n          \"noValue\": \"Sin datos\"\
+    \n        },\n        \"overrides\": []\n      },\n      \"options\": {\n    \
+    \    \"reduceOptions\": {\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\",\n          \"values\": false\n   \
+    \     },\n        \"orientation\": \"auto\",\n        \"textMode\": \"auto\",\n\
+    \        \"colorMode\": \"value\",\n        \"graphMode\": \"none\",\n       \
+    \ \"justifyMode\": \"auto\",\n        \"wideLayout\": true\n      }\n    },\n\
+    \    {\n      \"id\": 12,\n      \"type\": \"stat\",\n      \"title\": \"Pods\
+    \ activos no Ready\",\n      \"description\": \"\",\n      \"gridPos\": {\n  \
+    \      \"x\": 16,\n        \"y\": 9,\n        \"w\": 4,\n        \"h\": 3\n  \
+    \    },\n      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"\
+    uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n          \"\
+    refId\": \"A\",\n          \"datasource\": {\n            \"type\": \"prometheus\"\
+    ,\n            \"uid\": \"prometheus\"\n          },\n          \"expr\": \"sum((max\
+    \ by(namespace,pod)(kube_pod_status_phase{phase=~\\\"Pending|Running|Unknown\\\
+    \"}) == 1) unless on(namespace,pod) (kube_pod_status_ready{condition=\\\"true\\\
+    \"} == 1)) or vector(0)\",\n          \"legendFormat\": \"\",\n          \"range\"\
+    : false,\n          \"instant\": true,\n          \"editorMode\": \"code\"\n \
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n     \
+    \     \"unit\": \"short\",\n          \"decimals\": 2,\n          \"color\": {\n\
+    \            \"mode\": \"palette-classic\"\n          },\n          \"noValue\"\
+    : \"Sin datos\"\n        },\n        \"overrides\": []\n      },\n      \"options\"\
+    : {\n        \"reduceOptions\": {\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\",\n          \"values\": false\n   \
+    \     },\n        \"orientation\": \"auto\",\n        \"textMode\": \"auto\",\n\
+    \        \"colorMode\": \"value\",\n        \"graphMode\": \"none\",\n       \
+    \ \"justifyMode\": \"auto\",\n        \"wideLayout\": true\n      }\n    },\n\
+    \    {\n      \"id\": 13,\n      \"type\": \"stat\",\n      \"title\": \"Reinicios\
+    \ Â· Ãºltima hora\",\n      \"description\": \"\",\n      \"gridPos\": {\n   \
+    \     \"x\": 20,\n        \"y\": 9,\n        \"w\": 4,\n        \"h\": 3\n   \
+    \   },\n      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"\
+    uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n          \"\
+    refId\": \"A\",\n          \"datasource\": {\n            \"type\": \"prometheus\"\
+    ,\n            \"uid\": \"prometheus\"\n          },\n          \"expr\": \"sum(increase(kube_pod_container_status_restarts_total[1h]))\
+    \ or vector(0)\",\n          \"legendFormat\": \"\",\n          \"range\": false,\n\
+    \          \"instant\": true,\n          \"editorMode\": \"code\"\n        }\n\
+    \      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\"\
+    : \"short\",\n          \"decimals\": 2,\n          \"color\": {\n           \
+    \ \"mode\": \"palette-classic\"\n          },\n          \"noValue\": \"Sin datos\"\
+    \n        },\n        \"overrides\": []\n      },\n      \"options\": {\n    \
+    \    \"reduceOptions\": {\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\",\n          \"values\": false\n   \
+    \     },\n        \"orientation\": \"auto\",\n        \"textMode\": \"auto\",\n\
+    \        \"colorMode\": \"value\",\n        \"graphMode\": \"none\",\n       \
+    \ \"justifyMode\": \"auto\",\n        \"wideLayout\": true\n      }\n    },\n\
+    \    {\n      \"id\": 14,\n      \"type\": \"row\",\n      \"title\": \"02 Â·\
+    \ Estado y capacidad de los nodos\",\n      \"description\": \"\",\n      \"gridPos\"\
+    : {\n        \"x\": 0,\n        \"y\": 12,\n        \"w\": 24,\n        \"h\"\
+    : 1\n      },\n      \"collapsed\": false,\n      \"panels\": []\n    },\n   \
+    \ {\n      \"id\": 15,\n      \"type\": \"bargauge\",\n      \"title\": \"CPU\
+    \ por nodo Â· nÃºcleos\",\n      \"description\": \"\",\n      \"gridPos\": {\n\
+    \        \"x\": 0,\n        \"y\": 13,\n        \"w\": 6,\n        \"h\": 6\n\
+    \      },\n      \"datasource\": {\n        \"type\": \"prometheus\",\n      \
+    \  \"uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n      \
+    \    \"refId\": \"A\",\n          \"datasource\": {\n            \"type\": \"\
+    prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"\
+    expr\": \"sum by(instance)(rate(node_cpu_seconds_total{job=\\\"nodes\\\",mode!~\\\
+    \"idle|guest|guest_nice\\\"}[1m])) * on(instance) group_left(nodename) node_uname_info{job=\\\
+    \"nodes\\\"}\",\n          \"legendFormat\": \"{{nodename}}\",\n          \"range\"\
+    : false,\n          \"instant\": true,\n          \"editorMode\": \"code\"\n \
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n     \
+    \     \"unit\": \"cores\",\n          \"decimals\": 2,\n          \"color\": {\n\
+    \            \"mode\": \"palette-classic\"\n          },\n          \"noValue\"\
+    : \"Sin datos\"\n        },\n        \"overrides\": []\n      },\n      \"options\"\
+    : {\n        \"reduceOptions\": {\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\",\n          \"values\": false\n   \
+    \     },\n        \"orientation\": \"horizontal\",\n        \"displayMode\": \"\
+    basic\",\n        \"showUnfilled\": true,\n        \"minVizHeight\": 10,\n   \
+    \     \"minVizWidth\": 0\n      }\n    },\n    {\n      \"id\": 16,\n      \"\
+    type\": \"bargauge\",\n      \"title\": \"RAM por nodo\",\n      \"description\"\
+    : \"\",\n      \"gridPos\": {\n        \"x\": 6,\n        \"y\": 13,\n       \
+    \ \"w\": 6,\n        \"h\": 6\n      },\n      \"datasource\": {\n        \"type\"\
+    : \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"datasource\": {\n   \
+    \         \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n   \
+    \       },\n          \"expr\": \"(node_memory_MemTotal_bytes{job=\\\"nodes\\\"\
+    } - node_memory_MemAvailable_bytes{job=\\\"nodes\\\"}) * on(instance) group_left(nodename)\
+    \ node_uname_info{job=\\\"nodes\\\"}\",\n          \"legendFormat\": \"{{nodename}}\"\
+    ,\n          \"range\": false,\n          \"instant\": true,\n          \"editorMode\"\
+    : \"code\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"bytes\",\n          \"decimals\": 2,\n          \"\
+    color\": {\n            \"mode\": \"palette-classic\"\n          },\n        \
+    \  \"noValue\": \"Sin datos\"\n        },\n        \"overrides\": []\n      },\n\
+    \      \"options\": {\n        \"reduceOptions\": {\n          \"calcs\": [\n\
+    \            \"lastNotNull\"\n          ],\n          \"fields\": \"\",\n    \
+    \      \"values\": false\n        },\n        \"orientation\": \"horizontal\"\
+    ,\n        \"displayMode\": \"basic\",\n        \"showUnfilled\": true,\n    \
+    \    \"minVizHeight\": 10,\n        \"minVizWidth\": 0\n      }\n    },\n    {\n\
+    \      \"id\": 17,\n      \"type\": \"bargauge\",\n      \"title\": \"Disco libre\
+    \ Â· raÃ­z por nodo\",\n      \"description\": \"\",\n      \"gridPos\": {\n \
+    \       \"x\": 12,\n        \"y\": 13,\n        \"w\": 6,\n        \"h\": 6\n\
+    \      },\n      \"datasource\": {\n        \"type\": \"prometheus\",\n      \
+    \  \"uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n      \
+    \    \"refId\": \"A\",\n          \"datasource\": {\n            \"type\": \"\
+    prometheus\",\n            \"uid\": \"prometheus\"\n          },\n          \"\
+    expr\": \"node_filesystem_avail_bytes{job=\\\"nodes\\\",mountpoint=\\\"/\\\",fstype!~\\\
+    \"tmpfs|overlay|squashfs|nsfs\\\"} * on(instance) group_left(nodename) node_uname_info{job=\\\
+    \"nodes\\\"}\",\n          \"legendFormat\": \"{{nodename}}\",\n          \"range\"\
+    : false,\n          \"instant\": true,\n          \"editorMode\": \"code\"\n \
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n     \
+    \     \"unit\": \"bytes\",\n          \"decimals\": 2,\n          \"color\": {\n\
+    \            \"mode\": \"palette-classic\"\n          },\n          \"noValue\"\
+    : \"Sin datos\"\n        },\n        \"overrides\": []\n      },\n      \"options\"\
+    : {\n        \"reduceOptions\": {\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\",\n          \"values\": false\n   \
+    \     },\n        \"orientation\": \"horizontal\",\n        \"displayMode\": \"\
+    basic\",\n        \"showUnfilled\": true,\n        \"minVizHeight\": 10,\n   \
+    \     \"minVizWidth\": 0\n      }\n    },\n    {\n      \"id\": 18,\n      \"\
+    type\": \"bargauge\",\n      \"title\": \"Red recibida Â· por nodo\",\n      \"\
+    description\": \"\",\n      \"gridPos\": {\n        \"x\": 18,\n        \"y\"\
+    : 13,\n        \"w\": 6,\n        \"h\": 6\n      },\n      \"datasource\": {\n\
+    \        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n\
+    \      \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"datasource\"\
+    : {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\
+    \n          },\n          \"expr\": \"sum by(instance)(rate(node_network_receive_bytes_total{job=\\\
+    \"nodes\\\",device=~\\\"eth[0-9]+|en.*|wlan[0-9]+\\\"}[1m])) * on(instance) group_left(nodename)\
+    \ node_uname_info{job=\\\"nodes\\\"}\",\n          \"legendFormat\": \"{{nodename}}\"\
+    ,\n          \"range\": false,\n          \"instant\": true,\n          \"editorMode\"\
+    : \"code\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"Bps\",\n          \"decimals\": 2,\n          \"color\"\
+    : {\n            \"mode\": \"palette-classic\"\n          },\n          \"noValue\"\
+    : \"Sin datos\"\n        },\n        \"overrides\": []\n      },\n      \"options\"\
+    : {\n        \"reduceOptions\": {\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\",\n          \"values\": false\n   \
+    \     },\n        \"orientation\": \"horizontal\",\n        \"displayMode\": \"\
+    basic\",\n        \"showUnfilled\": true,\n        \"minVizHeight\": 10,\n   \
+    \     \"minVizWidth\": 0\n      }\n    },\n    {\n      \"id\": 19,\n      \"\
+    type\": \"stat\",\n      \"title\": \"Objetivos Prometheus caÃ­dos\",\n      \"\
+    description\": \"\",\n      \"gridPos\": {\n        \"x\": 0,\n        \"y\":\
+    \ 19,\n        \"w\": 6,\n        \"h\": 3\n      },\n      \"datasource\": {\n\
+    \        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n\
+    \      \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"datasource\"\
+    : {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\
+    \n          },\n          \"expr\": \"sum(up == bool 0)\",\n          \"legendFormat\"\
+    : \"\",\n          \"range\": false,\n          \"instant\": true,\n         \
+    \ \"editorMode\": \"code\"\n        }\n      ],\n      \"fieldConfig\": {\n  \
+    \      \"defaults\": {\n          \"unit\": \"short\",\n          \"decimals\"\
+    : 2,\n          \"color\": {\n            \"mode\": \"thresholds\"\n         \
+    \ },\n          \"noValue\": \"Sin datos\",\n          \"thresholds\": {\n   \
+    \         \"mode\": \"absolute\",\n            \"steps\": [\n              {\n\
+    \                \"color\": \"green\",\n                \"value\": null\n    \
+    \          },\n              {\n                \"color\": \"red\",\n        \
+    \        \"value\": 1\n              }\n            ]\n          }\n        },\n\
+    \        \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\"\
+    : {\n          \"calcs\": [\n            \"lastNotNull\"\n          ],\n     \
+    \     \"fields\": \"\",\n          \"values\": false\n        },\n        \"orientation\"\
+    : \"auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\"\
+    ,\n        \"graphMode\": \"none\",\n        \"justifyMode\": \"auto\",\n    \
+    \    \"wideLayout\": true\n      }\n    },\n    {\n      \"id\": 20,\n      \"\
+    type\": \"stat\",\n      \"title\": \"PVC sin enlazar\",\n      \"description\"\
+    : \"\",\n      \"gridPos\": {\n        \"x\": 6,\n        \"y\": 19,\n       \
+    \ \"w\": 6,\n        \"h\": 3\n      },\n      \"datasource\": {\n        \"type\"\
+    : \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"datasource\": {\n   \
+    \         \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n   \
+    \       },\n          \"expr\": \"sum(kube_persistentvolumeclaim_status_phase{phase!=\\\
+    \"Bound\\\"} == 1) or vector(0)\",\n          \"legendFormat\": \"\",\n      \
+    \    \"range\": false,\n          \"instant\": true,\n          \"editorMode\"\
+    : \"code\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"short\",\n          \"decimals\": 2,\n          \"\
+    color\": {\n            \"mode\": \"thresholds\"\n          },\n          \"noValue\"\
+    : \"Sin datos\",\n          \"thresholds\": {\n            \"mode\": \"absolute\"\
+    ,\n            \"steps\": [\n              {\n                \"color\": \"green\"\
+    ,\n                \"value\": null\n              },\n              {\n      \
+    \          \"color\": \"red\",\n                \"value\": 1\n              }\n\
+    \            ]\n          }\n        },\n        \"overrides\": []\n      },\n\
+    \      \"options\": {\n        \"reduceOptions\": {\n          \"calcs\": [\n\
+    \            \"lastNotNull\"\n          ],\n          \"fields\": \"\",\n    \
+    \      \"values\": false\n        },\n        \"orientation\": \"auto\",\n   \
+    \     \"textMode\": \"auto\",\n        \"colorMode\": \"value\",\n        \"graphMode\"\
+    : \"none\",\n        \"justifyMode\": \"auto\",\n        \"wideLayout\": true\n\
+    \      }\n    },\n    {\n      \"id\": 21,\n      \"type\": \"stat\",\n      \"\
+    title\": \"Pods pendientes\",\n      \"description\": \"\",\n      \"gridPos\"\
+    : {\n        \"x\": 12,\n        \"y\": 19,\n        \"w\": 6,\n        \"h\"\
+    : 3\n      },\n      \"datasource\": {\n        \"type\": \"prometheus\",\n  \
+    \      \"uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n  \
+    \        \"refId\": \"A\",\n          \"datasource\": {\n            \"type\"\
+    : \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n       \
+    \   \"expr\": \"sum(kube_pod_status_phase{phase=\\\"Pending\\\"})\",\n       \
+    \   \"legendFormat\": \"\",\n          \"range\": false,\n          \"instant\"\
+    : true,\n          \"editorMode\": \"code\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"short\",\n          \"decimals\"\
+    : 2,\n          \"color\": {\n            \"mode\": \"thresholds\"\n         \
+    \ },\n          \"noValue\": \"Sin datos\",\n          \"thresholds\": {\n   \
+    \         \"mode\": \"absolute\",\n            \"steps\": [\n              {\n\
+    \                \"color\": \"green\",\n                \"value\": null\n    \
+    \          },\n              {\n                \"color\": \"red\",\n        \
+    \        \"value\": 1\n              }\n            ]\n          }\n        },\n\
+    \        \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\"\
+    : {\n          \"calcs\": [\n            \"lastNotNull\"\n          ],\n     \
+    \     \"fields\": \"\",\n          \"values\": false\n        },\n        \"orientation\"\
+    : \"auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\"\
+    ,\n        \"graphMode\": \"none\",\n        \"justifyMode\": \"auto\",\n    \
+    \    \"wideLayout\": true\n      }\n    },\n    {\n      \"id\": 22,\n      \"\
+    type\": \"stat\",\n      \"title\": \"Nodos con presiÃ³n\",\n      \"description\"\
+    : \"\",\n      \"gridPos\": {\n        \"x\": 18,\n        \"y\": 19,\n      \
+    \  \"w\": 6,\n        \"h\": 3\n      },\n      \"datasource\": {\n        \"\
+    type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"datasource\": {\n   \
+    \         \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\n   \
+    \       },\n          \"expr\": \"sum(kube_node_status_condition{condition=~\\\
+    \"MemoryPressure|DiskPressure|PIDPressure\\\",status=\\\"true\\\"})\",\n     \
+    \     \"legendFormat\": \"\",\n          \"range\": false,\n          \"instant\"\
+    : true,\n          \"editorMode\": \"code\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"short\",\n          \"decimals\"\
+    : 2,\n          \"color\": {\n            \"mode\": \"thresholds\"\n         \
+    \ },\n          \"noValue\": \"Sin datos\",\n          \"thresholds\": {\n   \
+    \         \"mode\": \"absolute\",\n            \"steps\": [\n              {\n\
+    \                \"color\": \"green\",\n                \"value\": null\n    \
+    \          },\n              {\n                \"color\": \"red\",\n        \
+    \        \"value\": 1\n              }\n            ]\n          }\n        },\n\
+    \        \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\"\
+    : {\n          \"calcs\": [\n            \"lastNotNull\"\n          ],\n     \
+    \     \"fields\": \"\",\n          \"values\": false\n        },\n        \"orientation\"\
+    : \"auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\"\
+    ,\n        \"graphMode\": \"none\",\n        \"justifyMode\": \"auto\",\n    \
+    \    \"wideLayout\": true\n      }\n    },\n    {\n      \"id\": 23,\n      \"\
+    type\": \"row\",\n      \"title\": \"03 Â· Consumo histÃ³rico por pod â€” filtros\
+    \ Namespace y Pod\",\n      \"description\": \"\",\n      \"gridPos\": {\n   \
+    \     \"x\": 0,\n        \"y\": 22,\n        \"w\": 24,\n        \"h\": 1\n  \
+    \    },\n      \"collapsed\": false,\n      \"panels\": []\n    },\n    {\n  \
+    \    \"id\": 24,\n      \"type\": \"timeseries\",\n      \"title\": \"CPU por\
+    \ pod Â· mCPU\",\n      \"description\": \"1000 mCPU = un nÃºcleo. Solo contenedores\
+    \ reales; excluye agregados y sandbox. HistÃ³rico disponible desde la incorporaciÃ³n\
+    \ de cAdvisor.\",\n      \"gridPos\": {\n        \"x\": 0,\n        \"y\": 23,\n\
+    \        \"w\": 12,\n        \"h\": 9\n      },\n      \"datasource\": {\n   \
+    \     \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n \
+    \     \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"datasource\"\
+    : {\n            \"type\": \"prometheus\",\n            \"uid\": \"prometheus\"\
+    \n          },\n          \"expr\": \"1000 * sum by(namespace,pod)(rate(container_cpu_usage_seconds_total{job=\\\
+    \"kubelet-cadvisor\\\",namespace=~\\\"${namespace:regex}\\\",pod=~\\\"${pod:regex}\\\
+    \",pod!=\\\"\\\",container!=\\\"\\\",container!=\\\"POD\\\"}[$__rate_interval]))\"\
+    ,\n          \"legendFormat\": \"{{namespace}} / {{pod}}\",\n          \"range\"\
+    : true,\n          \"instant\": false,\n          \"editorMode\": \"code\"\n \
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n     \
+    \     \"unit\": \"suffix: mCPU\",\n          \"decimals\": 2,\n          \"color\"\
+    : {\n            \"mode\": \"palette-classic\"\n          },\n          \"noValue\"\
+    : \"Sin datos\",\n          \"custom\": {\n            \"drawStyle\": \"line\"\
+    ,\n            \"lineInterpolation\": \"smooth\",\n            \"lineWidth\":\
+    \ 1,\n            \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n\
+    \            \"spanNulls\": false,\n            \"axisPlacement\": \"auto\",\n\
+    \            \"stacking\": {\n              \"mode\": \"none\",\n            \
+    \  \"group\": \"A\"\n            }\n          }\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"legend\": {\n          \"displayMode\"\
+    : \"table\",\n          \"placement\": \"right\",\n          \"calcs\": [\n  \
+    \          \"lastNotNull\",\n            \"max\"\n          ],\n          \"showLegend\"\
+    : true,\n          \"width\": 250\n        },\n        \"tooltip\": {\n      \
+    \    \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        }\n      }\n\
+    \    },\n    {\n      \"id\": 25,\n      \"type\": \"timeseries\",\n      \"title\"\
+    : \"RAM por pod Â· working set\",\n      \"description\": \"Memoria working set\
+    \ sumada por pod. No es el valor del lÃ­mite o request.\",\n      \"gridPos\"\
+    : {\n        \"x\": 12,\n        \"y\": 23,\n        \"w\": 12,\n        \"h\"\
+    : 9\n      },\n      \"datasource\": {\n        \"type\": \"prometheus\",\n  \
+    \      \"uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n  \
+    \        \"refId\": \"A\",\n          \"datasource\": {\n            \"type\"\
+    : \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n       \
+    \   \"expr\": \"sum by(namespace,pod)(container_memory_working_set_bytes{job=\\\
+    \"kubelet-cadvisor\\\",namespace=~\\\"${namespace:regex}\\\",pod=~\\\"${pod:regex}\\\
+    \",pod!=\\\"\\\",container!=\\\"\\\",container!=\\\"POD\\\"})\",\n          \"\
+    legendFormat\": \"{{namespace}} / {{pod}}\",\n          \"range\": true,\n   \
+    \       \"instant\": false,\n          \"editorMode\": \"code\"\n        }\n \
+    \     ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\"\
+    : \"bytes\",\n          \"decimals\": 2,\n          \"color\": {\n           \
+    \ \"mode\": \"palette-classic\"\n          },\n          \"noValue\": \"Sin datos\"\
+    ,\n          \"custom\": {\n            \"drawStyle\": \"line\",\n           \
+    \ \"lineInterpolation\": \"smooth\",\n            \"lineWidth\": 1,\n        \
+    \    \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n           \
+    \ \"spanNulls\": false,\n            \"axisPlacement\": \"auto\",\n          \
+    \  \"stacking\": {\n              \"mode\": \"none\",\n              \"group\"\
+    : \"A\"\n            }\n          }\n        },\n        \"overrides\": []\n \
+    \     },\n      \"options\": {\n        \"legend\": {\n          \"displayMode\"\
+    : \"table\",\n          \"placement\": \"right\",\n          \"calcs\": [\n  \
+    \          \"lastNotNull\",\n            \"max\"\n          ],\n          \"showLegend\"\
+    : true,\n          \"width\": 250\n        },\n        \"tooltip\": {\n      \
+    \    \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        }\n      }\n\
+    \    },\n    {\n      \"id\": 26,\n      \"type\": \"timeseries\",\n      \"title\"\
+    : \"Red por pod Â· recepciÃ³n\",\n      \"description\": \"Deduplicada por pod\
+    \ e interfaz. Se excluyen pods hostNetwork: comparten la red del nodo y no se\
+    \ puede atribuir su trÃ¡fico por separado.\",\n      \"gridPos\": {\n        \"\
+    x\": 0,\n        \"y\": 32,\n        \"w\": 12,\n        \"h\": 8\n      },\n\
+    \      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\":\
+    \ \"prometheus\"\n      },\n      \"targets\": [\n        {\n          \"refId\"\
+    : \"A\",\n          \"datasource\": {\n            \"type\": \"prometheus\",\n\
+    \            \"uid\": \"prometheus\"\n          },\n          \"expr\": \"sum\
+    \ by(namespace,pod)(max by(namespace,pod,interface)(rate(container_network_receive_bytes_total{job=\\\
+    \"kubelet-cadvisor\\\",namespace=~\\\"${namespace:regex}\\\",pod=~\\\"${pod:regex}\\\
+    \",pod!=\\\"\\\",interface!=\\\"lo\\\"}[$__rate_interval]))) * on(namespace,pod)\
+    \ group_left() max by(namespace,pod)(kube_pod_info{host_network=\\\"false\\\"\
+    })\",\n          \"legendFormat\": \"{{namespace}} / {{pod}}\",\n          \"\
+    range\": true,\n          \"instant\": false,\n          \"editorMode\": \"code\"\
+    \n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n   \
+    \       \"unit\": \"Bps\",\n          \"decimals\": 2,\n          \"color\": {\n\
+    \            \"mode\": \"palette-classic\"\n          },\n          \"noValue\"\
+    : \"Sin datos\",\n          \"custom\": {\n            \"drawStyle\": \"line\"\
+    ,\n            \"lineInterpolation\": \"smooth\",\n            \"lineWidth\":\
+    \ 1,\n            \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n\
+    \            \"spanNulls\": false,\n            \"axisPlacement\": \"auto\",\n\
+    \            \"stacking\": {\n              \"mode\": \"none\",\n            \
+    \  \"group\": \"A\"\n            }\n          }\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"legend\": {\n          \"displayMode\"\
+    : \"table\",\n          \"placement\": \"right\",\n          \"calcs\": [\n  \
+    \          \"lastNotNull\",\n            \"max\"\n          ],\n          \"showLegend\"\
+    : true,\n          \"width\": 250\n        },\n        \"tooltip\": {\n      \
+    \    \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        }\n      }\n\
+    \    },\n    {\n      \"id\": 27,\n      \"type\": \"timeseries\",\n      \"title\"\
+    : \"Red por pod Â· transmisiÃ³n\",\n      \"description\": \"Mismas exclusiones\
+    \ que recepciÃ³n. Ver panel de nodos para red de pods hostNetwork.\",\n      \"\
+    gridPos\": {\n        \"x\": 12,\n        \"y\": 32,\n        \"w\": 12,\n   \
+    \     \"h\": 8\n      },\n      \"datasource\": {\n        \"type\": \"prometheus\"\
+    ,\n        \"uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n\
+    \          \"refId\": \"A\",\n          \"datasource\": {\n            \"type\"\
+    : \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n       \
+    \   \"expr\": \"sum by(namespace,pod)(max by(namespace,pod,interface)(rate(container_network_transmit_bytes_total{job=\\\
+    \"kubelet-cadvisor\\\",namespace=~\\\"${namespace:regex}\\\",pod=~\\\"${pod:regex}\\\
+    \",pod!=\\\"\\\",interface!=\\\"lo\\\"}[$__rate_interval]))) * on(namespace,pod)\
+    \ group_left() max by(namespace,pod)(kube_pod_info{host_network=\\\"false\\\"\
+    })\",\n          \"legendFormat\": \"{{namespace}} / {{pod}}\",\n          \"\
+    range\": true,\n          \"instant\": false,\n          \"editorMode\": \"code\"\
+    \n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n   \
+    \       \"unit\": \"Bps\",\n          \"decimals\": 2,\n          \"color\": {\n\
+    \            \"mode\": \"palette-classic\"\n          },\n          \"noValue\"\
+    : \"Sin datos\",\n          \"custom\": {\n            \"drawStyle\": \"line\"\
+    ,\n            \"lineInterpolation\": \"smooth\",\n            \"lineWidth\":\
+    \ 1,\n            \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n\
+    \            \"spanNulls\": false,\n            \"axisPlacement\": \"auto\",\n\
+    \            \"stacking\": {\n              \"mode\": \"none\",\n            \
+    \  \"group\": \"A\"\n            }\n          }\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"legend\": {\n          \"displayMode\"\
+    : \"table\",\n          \"placement\": \"right\",\n          \"calcs\": [\n  \
+    \          \"lastNotNull\",\n            \"max\"\n          ],\n          \"showLegend\"\
+    : true,\n          \"width\": 250\n        },\n        \"tooltip\": {\n      \
+    \    \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        }\n      }\n\
+    \    },\n    {\n      \"id\": 28,\n      \"type\": \"timeseries\",\n      \"title\"\
+    : \"Disco por pod Â· lectura\",\n      \"description\": \"I/O de bloques atribuido\
+    \ por cAdvisor al contenedor; no representa espacio ocupado ni trÃ¡fico NFS, y\
+    \ puede ser cero o no estar disponible para algunos pods.\",\n      \"gridPos\"\
+    : {\n        \"x\": 0,\n        \"y\": 40,\n        \"w\": 12,\n        \"h\"\
+    : 8\n      },\n      \"datasource\": {\n        \"type\": \"prometheus\",\n  \
+    \      \"uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n  \
+    \        \"refId\": \"A\",\n          \"datasource\": {\n            \"type\"\
+    : \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n       \
+    \   \"expr\": \"sum by(namespace,pod)(rate(container_fs_reads_bytes_total{job=\\\
+    \"kubelet-cadvisor\\\",namespace=~\\\"${namespace:regex}\\\",pod=~\\\"${pod:regex}\\\
+    \",pod!=\\\"\\\",container!=\\\"\\\",container!=\\\"POD\\\"}[$__rate_interval]))\"\
+    ,\n          \"legendFormat\": \"{{namespace}} / {{pod}}\",\n          \"range\"\
+    : true,\n          \"instant\": false,\n          \"editorMode\": \"code\"\n \
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n     \
+    \     \"unit\": \"Bps\",\n          \"decimals\": 2,\n          \"color\": {\n\
+    \            \"mode\": \"palette-classic\"\n          },\n          \"noValue\"\
+    : \"Sin datos\",\n          \"custom\": {\n            \"drawStyle\": \"line\"\
+    ,\n            \"lineInterpolation\": \"smooth\",\n            \"lineWidth\":\
+    \ 1,\n            \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n\
+    \            \"spanNulls\": false,\n            \"axisPlacement\": \"auto\",\n\
+    \            \"stacking\": {\n              \"mode\": \"none\",\n            \
+    \  \"group\": \"A\"\n            }\n          }\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"legend\": {\n          \"displayMode\"\
+    : \"table\",\n          \"placement\": \"right\",\n          \"calcs\": [\n  \
+    \          \"lastNotNull\",\n            \"max\"\n          ],\n          \"showLegend\"\
+    : true,\n          \"width\": 250\n        },\n        \"tooltip\": {\n      \
+    \    \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        }\n      }\n\
+    \    },\n    {\n      \"id\": 29,\n      \"type\": \"timeseries\",\n      \"title\"\
+    : \"Disco por pod Â· escritura\",\n      \"description\": \"I/O de bloques atribuido\
+    \ por cAdvisor al contenedor; no representa espacio ocupado ni trÃ¡fico NFS, y\
+    \ puede ser cero o no estar disponible para algunos pods.\",\n      \"gridPos\"\
+    : {\n        \"x\": 12,\n        \"y\": 40,\n        \"w\": 12,\n        \"h\"\
+    : 8\n      },\n      \"datasource\": {\n        \"type\": \"prometheus\",\n  \
+    \      \"uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n  \
+    \        \"refId\": \"A\",\n          \"datasource\": {\n            \"type\"\
+    : \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n       \
+    \   \"expr\": \"sum by(namespace,pod)(rate(container_fs_writes_bytes_total{job=\\\
+    \"kubelet-cadvisor\\\",namespace=~\\\"${namespace:regex}\\\",pod=~\\\"${pod:regex}\\\
+    \",pod!=\\\"\\\",container!=\\\"\\\",container!=\\\"POD\\\"}[$__rate_interval]))\"\
+    ,\n          \"legendFormat\": \"{{namespace}} / {{pod}}\",\n          \"range\"\
+    : true,\n          \"instant\": false,\n          \"editorMode\": \"code\"\n \
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n     \
+    \     \"unit\": \"Bps\",\n          \"decimals\": 2,\n          \"color\": {\n\
+    \            \"mode\": \"palette-classic\"\n          },\n          \"noValue\"\
+    : \"Sin datos\",\n          \"custom\": {\n            \"drawStyle\": \"line\"\
+    ,\n            \"lineInterpolation\": \"smooth\",\n            \"lineWidth\":\
+    \ 1,\n            \"fillOpacity\": 8,\n            \"showPoints\": \"never\",\n\
+    \            \"spanNulls\": false,\n            \"axisPlacement\": \"auto\",\n\
+    \            \"stacking\": {\n              \"mode\": \"none\",\n            \
+    \  \"group\": \"A\"\n            }\n          }\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"legend\": {\n          \"displayMode\"\
+    : \"table\",\n          \"placement\": \"right\",\n          \"calcs\": [\n  \
+    \          \"lastNotNull\",\n            \"max\"\n          ],\n          \"showLegend\"\
+    : true,\n          \"width\": 250\n        },\n        \"tooltip\": {\n      \
+    \    \"mode\": \"multi\",\n          \"sort\": \"desc\"\n        }\n      }\n\
+    \    },\n    {\n      \"id\": 30,\n      \"type\": \"row\",\n      \"title\":\
+    \ \"04 Â· Almacenamiento y reinicios por pod\",\n      \"description\": \"\",\n\
+    \      \"gridPos\": {\n        \"x\": 0,\n        \"y\": 48,\n        \"w\": 24,\n\
+    \        \"h\": 1\n      },\n      \"collapsed\": false,\n      \"panels\": []\n\
+    \    },\n    {\n      \"id\": 31,\n      \"type\": \"timeseries\",\n      \"title\"\
+    : \"Reinicios por pod Â· ventana de 1 h\",\n      \"description\": \"\",\n   \
+    \   \"gridPos\": {\n        \"x\": 0,\n        \"y\": 49,\n        \"w\": 12,\n\
+    \        \"h\": 7\n      },\n      \"datasource\": {\n        \"type\": \"prometheus\"\
+    ,\n        \"uid\": \"prometheus\"\n      },\n      \"targets\": [\n        {\n\
+    \          \"refId\": \"A\",\n          \"datasource\": {\n            \"type\"\
+    : \"prometheus\",\n            \"uid\": \"prometheus\"\n          },\n       \
+    \   \"expr\": \"sum by(namespace,pod)(increase(kube_pod_container_status_restarts_total{namespace=~\\\
+    \"${namespace:regex}\\\",pod=~\\\"${pod:regex}\\\"}[1h]))\",\n          \"legendFormat\"\
+    : \"{{namespace}} / {{pod}}\",\n          \"range\": true,\n          \"instant\"\
+    : false,\n          \"editorMode\": \"code\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"short\",\n          \"decimals\"\
+    : 2,\n          \"color\": {\n            \"mode\": \"palette-classic\"\n    \
+    \      },\n          \"noValue\": \"Sin datos\",\n          \"custom\": {\n  \
+    \          \"drawStyle\": \"line\",\n            \"lineInterpolation\": \"smooth\"\
+    ,\n            \"lineWidth\": 1,\n            \"fillOpacity\": 8,\n          \
+    \  \"showPoints\": \"never\",\n            \"spanNulls\": false,\n           \
+    \ \"axisPlacement\": \"auto\",\n            \"stacking\": {\n              \"\
+    mode\": \"none\",\n              \"group\": \"A\"\n            }\n          }\n\
+    \        },\n        \"overrides\": []\n      },\n      \"options\": {\n     \
+    \   \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\"\
+    : \"right\",\n          \"calcs\": [\n            \"lastNotNull\",\n         \
+    \   \"max\"\n          ],\n          \"showLegend\": true,\n          \"width\"\
+    : 250\n        },\n        \"tooltip\": {\n          \"mode\": \"multi\",\n  \
+    \        \"sort\": \"desc\"\n        }\n      }\n    },\n    {\n      \"id\":\
+    \ 32,\n      \"type\": \"text\",\n      \"title\": \"Alcance de las mÃ©tricas\"\
+    ,\n      \"description\": \"\",\n      \"gridPos\": {\n        \"x\": 12,\n  \
+    \      \"y\": 49,\n        \"w\": 12,\n        \"h\": 7\n      },\n      \"options\"\
+    : {\n        \"mode\": \"markdown\",\n        \"content\": \"**ActualizaciÃ³n:**\
+    \ cada 30 s, con tasas promediadas sobre ventanas de muestreo.\\n\\n**Discos superiores:**\
+    \ raÃ­ces `/` de los cuatro nodos. El NAS `.164` estÃ¡ fuera del clÃºster y no\
+    \ tiene exporter en este dashboard.\\n\\n**HistÃ³ricos por pod:** empiezan al\
+    \ activar cAdvisor. CPU/RAM desde contenedores; red excluye `hostNetwork`.\\n\\\
+    n**Disco por pod:** I/O de bloques, no espacio ocupado. Los kubelets actuales\
+    \ no exponen `container_fs_usage_bytes`; tampoco hay mediciÃ³n de capacidad usada\
+    \ del PVC NFS. No se inventan ceros ni capacidades reales a partir de requests.\\\
+    n\\n**Persistencia:** Prometheus conserva 15 dÃ­as. Panel administrado desde GitOps;\
+    \ namespace/pod solo filtran los paneles histÃ³ricos.\"\n      }\n    }\n  ],\n\
+    \  \"links\": [\n    {\n      \"title\": \"Prometheus\",\n      \"type\": \"link\"\
+    ,\n      \"url\": \"https://prometheus.bearsfamily.aa\",\n      \"targetBlank\"\
+    : true\n    },\n    {\n      \"title\": \"Argo CD\",\n      \"type\": \"link\"\
+    ,\n      \"url\": \"https://argocd.bearsfamily.aa\",\n      \"targetBlank\": true\n\
+    \    }\n  ]\n}\n"
+  postgresql.json: '{"uid": "bearsfamily-postgresql", "title": "BearsFamily · PostgreSQL",
+    "schemaVersion": 39, "version": 1, "refresh": "30s", "time": {"from": "now-6h",
+    "to": "now"}, "tags": ["homelab", "postgresql"], "panels": [{"id": 1, "title":
+    "PostgreSQL disponible", "type": "stat", "datasource": {"type": "prometheus",
+    "uid": "prometheus"}, "gridPos": {"x": 0, "y": 0, "w": 6, "h": 5}, "targets":
+    [{"refId": "A", "expr": "cnpg_collector_up{job=\"postgresql-cnpg\"}", "legendFormat":
+    "PostgreSQL disponible"}], "fieldConfig": {"defaults": {"unit": "none"}, "overrides":
+    []}, "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values":
+    false}}}, {"id": 2, "title": "Conexiones", "type": "stat", "datasource": {"type":
+    "prometheus", "uid": "prometheus"}, "gridPos": {"x": 6, "y": 0, "w": 6, "h": 5},
+    "targets": [{"refId": "A", "expr": "sum(cnpg_homelab_activity_connections)", "legendFormat":
+    "{{datname}}"}], "fieldConfig": {"defaults": {"unit": "none"}, "overrides": []},
+    "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values":
+    false}}}, {"id": 3, "title": "Datos por base", "type": "stat", "datasource": {"type":
+    "prometheus", "uid": "prometheus"}, "gridPos": {"x": 12, "y": 0, "w": 6, "h":
+    5}, "targets": [{"refId": "A", "expr": "cnpg_homelab_database_bytes", "legendFormat":
+    "{{datname}}"}], "fieldConfig": {"defaults": {"unit": "bytes"}, "overrides": []},
+    "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values":
+    false}}}, {"id": 4, "title": "WAL en disco", "type": "stat", "datasource": {"type":
+    "prometheus", "uid": "prometheus"}, "gridPos": {"x": 18, "y": 0, "w": 6, "h":
+    5}, "targets": [{"refId": "A", "expr": "cnpg_collector_pg_wal{job=\"postgresql-cnpg\"}",
+    "legendFormat": "WAL en disco"}], "fieldConfig": {"defaults": {"unit": "bytes"},
+    "overrides": []}, "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields":
+    "", "values": false}}}, {"id": 5, "title": "Conexiones por base", "type": "timeseries",
+    "datasource": {"type": "prometheus", "uid": "prometheus"}, "gridPos": {"x": 0,
+    "y": 5, "w": 12, "h": 8}, "targets": [{"refId": "A", "expr": "cnpg_homelab_activity_connections",
+    "legendFormat": "{{datname}}"}], "fieldConfig": {"defaults": {"unit": "none"},
+    "overrides": []}, "options": {}}, {"id": 6, "title": "Transacciones confirmadas/s",
+    "type": "timeseries", "datasource": {"type": "prometheus", "uid": "prometheus"},
+    "gridPos": {"x": 12, "y": 5, "w": 12, "h": 8}, "targets": [{"refId": "A", "expr":
+    "rate(cnpg_homelab_transactions_xact_commit[5m])", "legendFormat": "{{datname}}"}],
+    "fieldConfig": {"defaults": {"unit": "ops"}, "overrides": []}, "options": {}},
+    {"id": 7, "title": "Bloqueos en espera", "type": "timeseries", "datasource": {"type":
+    "prometheus", "uid": "prometheus"}, "gridPos": {"x": 0, "y": 13, "w": 12, "h":
+    8}, "targets": [{"refId": "A", "expr": "cnpg_homelab_activity_waiting_locks",
+    "legendFormat": "{{datname}}"}], "fieldConfig": {"defaults": {"unit": "none"},
+    "overrides": []}, "options": {}}, {"id": 8, "title": "Tamaño de bases", "type":
+    "timeseries", "datasource": {"type": "prometheus", "uid": "prometheus"}, "gridPos":
+    {"x": 12, "y": 13, "w": 12, "h": 8}, "targets": [{"refId": "A", "expr": "cnpg_homelab_database_bytes",
+    "legendFormat": "{{datname}}"}], "fieldConfig": {"defaults": {"unit": "bytes"},
+    "overrides": []}, "options": {}}]}'

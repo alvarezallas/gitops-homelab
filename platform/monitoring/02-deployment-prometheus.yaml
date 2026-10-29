@@ -16,6 +16,7 @@ spec:
         app: prometheus
       annotations:
         checksum/config: d9951898140160b67a8b8afa727e716646ffe4458b58a396202fa3612a7a9226
+        checksum/postgresql-metrics: 98463e3f582908c98754e959a1d00caef0a38ef6c6a81c22c65c6aeae9784578
     spec:
       nodeSelector:
         kubernetes.io/hostname: pi5

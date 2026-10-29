@@ -4,119 +4,40 @@ metadata:
   name: prometheus-config
   namespace: monitoring
 data:
-  prometheus.yml: |
-    {
-      "global": {
-        "scrape_interval": "30s"
-      },
-      "scrape_configs": [
-        {
-          "job_name": "prometheus",
-          "static_configs": [
-            {
-              "targets": [
-                "localhost:9090"
-              ]
-            }
-          ]
-        },
-        {
-          "job_name": "nodes",
-          "static_configs": [
-            {
-              "targets": [
-                "192.168.1.160:9100",
-                "192.168.1.161:9100",
-                "192.168.1.162:9100",
-                "192.168.1.163:9100"
-              ]
-            }
-          ]
-        },
-        {
-          "job_name": "kube-state-metrics",
-          "static_configs": [
-            {
-              "targets": [
-                "kube-state-metrics:8080"
-              ]
-            }
-          ]
-        },
-        {
-          "job_name": "kubelet-cadvisor",
-          "scheme": "https",
-          "scrape_interval": "30s",
-          "scrape_timeout": "20s",
-          "tls_config": {
-            "ca_file": "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-          },
-          "authorization": {
-            "credentials_file": "/var/run/secrets/kubernetes.io/serviceaccount/token"
-          },
-          "static_configs": [
-            {
-              "targets": [
-                "kubernetes.default.svc:443"
-              ],
-              "labels": {
-                "node": "pi5",
-                "instance": "pi5"
-              }
-            },
-            {
-              "targets": [
-                "kubernetes.default.svc:443"
-              ],
-              "labels": {
-                "node": "pi3b1",
-                "instance": "pi3b1"
-              }
-            },
-            {
-              "targets": [
-                "kubernetes.default.svc:443"
-              ],
-              "labels": {
-                "node": "pi3b2",
-                "instance": "pi3b2"
-              }
-            },
-            {
-              "targets": [
-                "kubernetes.default.svc:443"
-              ],
-              "labels": {
-                "node": "pi3b3",
-                "instance": "pi3b3"
-              }
-            }
-          ],
-          "relabel_configs": [
-            {
-              "source_labels": [
-                "node"
-              ],
-              "target_label": "__metrics_path__",
-              "replacement": "/api/v1/nodes/${1}/proxy/metrics/cadvisor"
-            }
-          ],
-          "metric_relabel_configs": [
-            {
-              "source_labels": [
-                "__name__"
-              ],
-              "regex": "container_(cpu_usage_seconds_total|memory_working_set_bytes|network_(receive|transmit)_bytes_total|fs_(reads|writes)_bytes_total)",
-              "action": "keep"
-            },
-            {
-              "source_labels": [
-                "pod"
-              ],
-              "regex": ".+",
-              "action": "keep"
-            }
-          ]
-        }
-      ]
-    }
+  prometheus.yml: "{\n  \"global\": {\n    \"scrape_interval\": \"30s\"\n  },\n  \"\
+    scrape_configs\": [\n    {\n      \"job_name\": \"prometheus\",\n      \"static_configs\"\
+    : [\n        {\n          \"targets\": [\n            \"localhost:9090\"\n   \
+    \       ]\n        }\n      ]\n    },\n    {\n      \"job_name\": \"nodes\",\n\
+    \      \"static_configs\": [\n        {\n          \"targets\": [\n          \
+    \  \"192.168.1.160:9100\",\n            \"192.168.1.161:9100\",\n            \"\
+    192.168.1.162:9100\",\n            \"192.168.1.163:9100\"\n          ]\n     \
+    \   }\n      ]\n    },\n    {\n      \"job_name\": \"kube-state-metrics\",\n \
+    \     \"static_configs\": [\n        {\n          \"targets\": [\n           \
+    \ \"kube-state-metrics:8080\"\n          ]\n        }\n      ]\n    },\n    {\n\
+    \      \"job_name\": \"kubelet-cadvisor\",\n      \"scheme\": \"https\",\n   \
+    \   \"scrape_interval\": \"30s\",\n      \"scrape_timeout\": \"20s\",\n      \"\
+    tls_config\": {\n        \"ca_file\": \"/var/run/secrets/kubernetes.io/serviceaccount/ca.crt\"\
+    \n      },\n      \"authorization\": {\n        \"credentials_file\": \"/var/run/secrets/kubernetes.io/serviceaccount/token\"\
+    \n      },\n      \"static_configs\": [\n        {\n          \"targets\": [\n\
+    \            \"kubernetes.default.svc:443\"\n          ],\n          \"labels\"\
+    : {\n            \"node\": \"pi5\",\n            \"instance\": \"pi5\"\n     \
+    \     }\n        },\n        {\n          \"targets\": [\n            \"kubernetes.default.svc:443\"\
+    \n          ],\n          \"labels\": {\n            \"node\": \"pi3b1\",\n  \
+    \          \"instance\": \"pi3b1\"\n          }\n        },\n        {\n     \
+    \     \"targets\": [\n            \"kubernetes.default.svc:443\"\n          ],\n\
+    \          \"labels\": {\n            \"node\": \"pi3b2\",\n            \"instance\"\
+    : \"pi3b2\"\n          }\n        },\n        {\n          \"targets\": [\n  \
+    \          \"kubernetes.default.svc:443\"\n          ],\n          \"labels\"\
+    : {\n            \"node\": \"pi3b3\",\n            \"instance\": \"pi3b3\"\n \
+    \         }\n        }\n      ],\n      \"relabel_configs\": [\n        {\n  \
+    \        \"source_labels\": [\n            \"node\"\n          ],\n          \"\
+    target_label\": \"__metrics_path__\",\n          \"replacement\": \"/api/v1/nodes/${1}/proxy/metrics/cadvisor\"\
+    \n        }\n      ],\n      \"metric_relabel_configs\": [\n        {\n      \
+    \    \"source_labels\": [\n            \"__name__\"\n          ],\n          \"\
+    regex\": \"container_(cpu_usage_seconds_total|memory_working_set_bytes|network_(receive|transmit)_bytes_total|fs_(reads|writes)_bytes_total)\"\
+    ,\n          \"action\": \"keep\"\n        },\n        {\n          \"source_labels\"\
+    : [\n            \"pod\"\n          ],\n          \"regex\": \".+\",\n       \
+    \   \"action\": \"keep\"\n        }\n      ]\n    },\n    {\n      \"job_name\"\
+    : \"postgresql-cnpg\",\n      \"static_configs\": [\n        {\n          \"targets\"\
+    : [\n            \"postgresql-metrics.databases.svc:9187\"\n          ]\n    \
+    \    }\n      ]\n    }\n  ]\n}"
