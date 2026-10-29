@@ -19,6 +19,7 @@ spec:
       - REVOKE CONNECT ON DATABASE semaphore FROM PUBLIC;
       - GRANT CONNECT ON DATABASE semaphore TO semaphore_app;
       - REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+      - GRANT CONNECT ON DATABASE semaphore TO cnpg_metrics_exporter;
   managed:
     roles:
     - name: pgadmin_monitor
@@ -29,6 +30,8 @@ spec:
       - pg_monitor
       passwordSecret:
         name: pgadmin-monitor-auth
+      inherit: true
+      connectionLimit: -1
   storage:
     size: 20Gi
     storageClass: nfs-storage
@@ -61,5 +64,7 @@ spec:
     - hostnossl all all ::/0 reject
   monitoring:
     customQueriesConfigMap:
+    - name: cnpg-default-monitoring
+      key: queries
     - name: postgresql-monitoring-queries
       key: queries.yaml
