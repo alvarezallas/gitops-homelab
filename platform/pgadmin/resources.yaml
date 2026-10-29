@@ -46,7 +46,7 @@ metadata:
   namespace: databases
 data:
   servers.json: "{\n  \"Servers\": {\n    \"1\": {\n      \"Name\": \"Homelab PostgreSQL\
-    \ · monitor\",\n      \"Group\": \"BearsFamily\",\n      \"Host\": \"homelab-postgres-rw.databases.svc\"\
+    \ Â· monitor\",\n      \"Group\": \"BearsFamily\",\n      \"Host\": \"homelab-postgres-rw.databases.svc\"\
     ,\n      \"Port\": 5432,\n      \"MaintenanceDB\": \"postgres\",\n      \"Username\"\
     : \"pgadmin_monitor\",\n      \"SSLMode\": \"verify-full\",\n      \"ConnectionParameters\"\
     : {\n        \"sslmode\": \"verify-full\",\n        \"sslrootcert\": \"certs/ca.crt\"\
@@ -80,7 +80,6 @@ spec:
         runAsUser: 5050
         runAsGroup: 5050
         runAsNonRoot: true
-        fsGroup: 5050
       containers:
       - name: pgadmin
         image: docker.io/dpage/pgadmin4:9.19@sha256:be4b61e4b356d06108b0f2ca802e797914073226b547e4224d5ab834348a3fe8
