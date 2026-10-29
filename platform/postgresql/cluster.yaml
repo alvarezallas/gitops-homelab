@@ -1,0 +1,61 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: homelab-postgres
+  namespace: databases
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.11-standard-trixie@sha256:e941e0f640f3b7688cf98ffbf7065f4de56a1331f2108b93cd67c0860383d7e1
+  enableSuperuserAccess: false
+  bootstrap:
+    initdb:
+      database: semaphore
+      owner: semaphore_app
+      secret:
+        name: semaphore-db-auth
+      postInitApplicationSQL:
+      - REVOKE CONNECT ON DATABASE semaphore FROM PUBLIC;
+      - GRANT CONNECT ON DATABASE semaphore TO semaphore_app;
+      - REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+  managed:
+    roles:
+    - name: pgadmin_monitor
+      ensure: present
+      login: true
+      superuser: false
+      inRoles:
+      - pg_monitor
+      passwordSecret:
+        name: pgadmin-monitor-auth
+  storage:
+    size: 20Gi
+    storageClass: nfs-storage
+    pvcTemplate:
+      accessModes:
+      - ReadWriteMany
+      volumeName: nfs-pv-01
+  affinity:
+    nodeSelector:
+      kubernetes.io/hostname: pi5
+    tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      cpu: '2'
+      memory: 2Gi
+  postgresql:
+    parameters:
+      max_connections: '100'
+      shared_buffers: 256MB
+      timezone: Europe/Madrid
+      password_encryption: scram-sha-256
+    pg_hba:
+    - hostnossl all all 0.0.0.0/0 reject
+    - hostnossl all all ::/0 reject

@@ -1,0 +1,177 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pgadmin-local-pv
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ''
+  local:
+    path: /opt/pgadmin/data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - pi5
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgadmin-data
+  namespace: databases
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: ''
+  volumeName: pgadmin-local-pv
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgadmin-servers
+  namespace: databases
+data:
+  servers.json: "{\n  \"Servers\": {\n    \"1\": {\n      \"Name\": \"Homelab PostgreSQL\
+    \ · monitor\",\n      \"Group\": \"BearsFamily\",\n      \"Host\": \"homelab-postgres-rw.databases.svc\"\
+    ,\n      \"Port\": 5432,\n      \"MaintenanceDB\": \"postgres\",\n      \"Username\"\
+    : \"pgadmin_monitor\",\n      \"SSLMode\": \"verify-full\",\n      \"ConnectionParameters\"\
+    : {\n        \"sslmode\": \"verify-full\",\n        \"sslrootcert\": \"certs/ca.crt\"\
+    ,\n        \"passfile\": \"monitor.pgpass\",\n        \"connect_timeout\": 10\n\
+    \      }\n    }\n  }\n}"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+  namespace: databases
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: pi5
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      securityContext:
+        runAsUser: 5050
+        runAsGroup: 5050
+        runAsNonRoot: true
+        fsGroup: 5050
+      containers:
+      - name: pgadmin
+        image: docker.io/dpage/pgadmin4:9.19@sha256:be4b61e4b356d06108b0f2ca802e797914073226b547e4224d5ab834348a3fe8
+        env:
+        - name: PGADMIN_DEFAULT_EMAIL
+          value: admin@bearsfamily.aa
+        - name: PGADMIN_DEFAULT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pgadmin-web-auth
+              key: password
+        - name: PGADMIN_LISTEN_PORT
+          value: '8080'
+        - name: PGADMIN_DISABLE_POSTFIX
+          value: '1'
+        - name: PGADMIN_CONFIG_PROXY_X_FOR_COUNT
+          value: '1'
+        - name: PGADMIN_CONFIG_PROXY_X_PROTO_COUNT
+          value: '1'
+        - name: PGADMIN_CONFIG_PROXY_X_HOST_COUNT
+          value: '1'
+        - name: PGADMIN_CONFIG_SESSION_COOKIE_SECURE
+          value: 'True'
+        - name: PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION
+          value: 'True'
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: '1'
+            memory: 768Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          httpGet:
+            path: /misc/ping
+            port: http
+          periodSeconds: 10
+          failureThreshold: 36
+        readinessProbe:
+          httpGet:
+            path: /misc/ping
+            port: http
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /misc/ping
+            port: http
+          periodSeconds: 30
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/pgadmin
+        - name: servers
+          mountPath: /pgadmin4/servers.json
+          subPath: servers.json
+          readOnly: true
+        - name: postgres-ca
+          mountPath: /var/lib/pgadmin/storage/admin_bearsfamily.aa/certs
+          readOnly: true
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: pgadmin-data
+      - name: servers
+        configMap:
+          name: pgadmin-servers
+      - name: postgres-ca
+        secret:
+          secretName: homelab-postgres-ca
+          items:
+          - key: ca.crt
+            path: ca.crt
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin
+  namespace: databases
+spec:
+  type: NodePort
+  selector:
+    app: pgadmin
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+    nodePort: 30091

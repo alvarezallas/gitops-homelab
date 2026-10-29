@@ -18,4 +18,4 @@ spec:
   - retrans=2
   nfs:
     server: 192.168.1.164
-    path: /mnt/d01tb
+    path: /mnt/d01tb/postgresql

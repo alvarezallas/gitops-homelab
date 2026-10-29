@@ -8,3 +8,6 @@ resources:
 - monitoring.yaml
 - downloads.yaml
 - argocd.yaml
+- cnpg-operator.yaml
+- postgresql.yaml
+- pgadmin.yaml
