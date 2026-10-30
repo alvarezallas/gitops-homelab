@@ -11,3 +11,8 @@ Máximo una tarea simultánea, tiempo máximo 300 s y Europe/Madrid. No hay prog
 La copia previa al bootstrap se cifra una sola vez en pi5 fuera de Git/OneDrive. Copias periódicas y recuperación completa todavía pendientes. Antes de actualizaciones, guardar base y claves juntas en un respaldo privado recuperable; volver a una imagen anterior no revierte migraciones.
 
 Fuentes: https://github.com/semaphoreui/semaphore/releases/tag/v2.19.17 y https://semaphoreui.com/docs/admin-guide/installation/docker
+
+
+## Automatización nginx activada — 30/10/2026
+
+Proyecto Homelab (1), plantilla nginx - sincronizar main (3), horario nginx main cada minuto (3) activo. SSH dedicado restringido y despliegue con releases atómicas, validación y reversión. Operación y límites en [el informe](automatizacion-nginx-20261030.md) y `automation/semaphore/nginx/README.md`. Argo CD conserva sync manual; esta tarea automatiza únicamente nginx.
