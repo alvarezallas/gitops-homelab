@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 printf 'Homelab: tarea local correcta\n'
-date --iso-8601=seconds
+date -Iseconds
 printf 'Zona horaria: %s\n' "${TZ:-no-definida}"
 printf 'UID: '; id -u
 printf 'Git: '; git --version
