@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: onthemanga-mailpit-pv
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Filesystem
+  storageClassName: ''
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    namespace: onthemanga
+    name: mailpit-data
+  local:
+    path: /var/lib/homelab-apps/onthemanga/mailpit
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - pi5

@@ -12,3 +12,4 @@ resources:
 - postgresql.yaml
 - pgadmin.yaml
 - semaphore.yaml
+- onthemanga.yaml

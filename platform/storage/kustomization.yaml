@@ -7,3 +7,5 @@ resources:
 - 03-persistentvolume-nfs-pv-08.yaml
 - 04-persistentvolume-nfs-pv-12.yaml
 - 05-persistentvolumeclaim-torrents-pvc.yaml
+- 06-onthemanga-objects-pv.yaml
+- 07-onthemanga-mailpit-pv.yaml

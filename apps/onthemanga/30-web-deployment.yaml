@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: onthemanga
+  namespace: onthemanga
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: onthemanga
+  template:
+    metadata:
+      labels:
+        app: onthemanga
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: pi5
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: web
+        image: docker.io/homelab/onthemanga:20261030-950508843abf@sha256:4ea713e85084c177b2e01109d64ff05894183bc00ff004f1930eac0b2efa1e04
+        imagePullPolicy: Never
+        ports:
+        - name: http
+          containerPort: 8080
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: cluster
+        - name: JAVA_TOOL_OPTIONS
+          value: -XX:MaxRAMPercentage=55.0 -XX:InitialRAMPercentage=15.0 -XX:ActiveProcessorCount=2
+            -Djava.awt.headless=true -Djava.io.tmpdir=/tmp
+        - name: TZ
+          value: Europe/Madrid
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+            ephemeral-storage: 256Mi
+          limits:
+            cpu: '1'
+            memory: 768Mi
+            ephemeral-storage: 1Gi
+        volumeMounts:
+        - name: objects
+          mountPath: /data/objects
+        - name: tmp
+          mountPath: /tmp
+        - name: app-auth
+          mountPath: /run/secrets/app
+          readOnly: true
+        - name: postgres-ca
+          mountPath: /etc/postgresql-ca
+          readOnly: true
+        startupProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: http
+          periodSeconds: 5
+          failureThreshold: 60
+          timeoutSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: http
+          periodSeconds: 10
+          failureThreshold: 3
+          timeoutSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: http
+          periodSeconds: 20
+          failureThreshold: 3
+          timeoutSeconds: 3
+      volumes:
+      - name: objects
+        persistentVolumeClaim:
+          claimName: onthemanga-objects
+      - name: tmp
+        emptyDir:
+          sizeLimit: 512Mi
+      - name: app-auth
+        secret:
+          secretName: onthemanga-app-auth
+          defaultMode: 288
+      - name: postgres-ca
+        configMap:
+          name: postgresql-ca
+      terminationGracePeriodSeconds: 45

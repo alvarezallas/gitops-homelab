@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailpit
+  namespace: onthemanga
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: mailpit
+  template:
+    metadata:
+      labels:
+        app: mailpit
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: pi5
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: mailpit
+        image: docker.io/axllent/mailpit:v1.31.1@sha256:0e084fa7c1c5e8203991839cb1915cc6e88fe2b1f9ddaaa9732ecabed7929006
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8025
+        - name: smtp
+          containerPort: 1025
+        env:
+        - name: MP_DATABASE
+          value: /data/mailpit.db
+        - name: MP_UI_AUTH_FILE
+          value: /run/secrets/mailpit/auth
+        - name: MP_ALLOWED_HOSTS
+          value: onthemanga-mail.bearsfamily.aa,mailpit,mailpit.onthemanga.svc
+        - name: MP_MAX_MESSAGES
+          value: '0'
+        - name: MP_DISABLE_VERSION_CHECK
+          value: 'true'
+        - name: MP_SMTP_DISABLE_RDNS
+          value: 'true'
+        - name: MP_BLOCK_REMOTE_CSS_AND_FONTS
+          value: 'true'
+        - name: TZ
+          value: Europe/Madrid
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+            ephemeral-storage: 256Mi
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: tmp
+          mountPath: /tmp
+        - name: web-auth
+          mountPath: /run/secrets/mailpit
+          readOnly: true
+        startupProbe:
+          tcpSocket:
+            port: http
+          periodSeconds: 3
+          failureThreshold: 30
+        readinessProbe:
+          tcpSocket:
+            port: http
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: http
+          periodSeconds: 20
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: mailpit-data
+      - name: tmp
+        emptyDir:
+          sizeLimit: 128Mi
+      - name: web-auth
+        secret:
+          secretName: mailpit-web-auth
+          items:
+          - key: auth
+            path: auth
+          defaultMode: 288
+      terminationGracePeriodSeconds: 45

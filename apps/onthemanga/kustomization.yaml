@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- 00-namespace.yaml
+- 10-objects-pvc.yaml
+- 11-mailpit-pvc.yaml
+- 20-mailpit-deployment.yaml
+- 21-mailpit-service.yaml
+- 22-mailpit-web-service.yaml
+- 30-web-deployment.yaml
+- 31-web-service.yaml
