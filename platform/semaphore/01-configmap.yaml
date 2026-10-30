@@ -24,3 +24,4 @@ data:
   SEMAPHORE_GIT_CLIENT: cmd_git
   PYTHONDONTWRITEBYTECODE: '1'
   HOME: /home/semaphore
+  SEMAPHORE_PORT: :3000

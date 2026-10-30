@@ -16,6 +16,7 @@ spec:
         app: semaphore
       annotations:
         checksum/config: 2ea063db8822f2bd378983ddd30ee650f55774314157758b052834f3fb7d583a
+        checksum/service-env: explicit-port-3000
     spec:
       nodeSelector:
         kubernetes.io/hostname: pi5
@@ -165,3 +166,4 @@ spec:
           name: semaphore-local-tasks
           defaultMode: 365
       terminationGracePeriodSeconds: 60
+      enableServiceLinks: false
