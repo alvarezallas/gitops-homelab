@@ -51,7 +51,7 @@ data:
     : \"pgadmin_monitor\",\n      \"SSLMode\": \"verify-full\",\n      \"ConnectionParameters\"\
     : {\n        \"sslmode\": \"verify-full\",\n        \"sslrootcert\": \"certs/ca.crt\"\
     ,\n        \"passfile\": \"monitor.pgpass\",\n        \"connect_timeout\": 10\n\
-    \      }\n    }\n  }\n}"
+    \      },\n      \"DBRestriction\": \"postgres\"\n    }\n  }\n}"
 ---
 apiVersion: apps/v1
 kind: Deployment
