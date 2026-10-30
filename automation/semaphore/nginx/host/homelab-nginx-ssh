@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+if [ "${SSH_ORIGINAL_COMMAND:-}" != "deploy-nginx" ]; then
+    echo 'Only deploy-nginx is permitted' >&2
+    exit 126
+fi
+exec /usr/bin/sudo -n /usr/bin/timeout --signal=TERM --kill-after=10s 170s /usr/local/sbin/homelab-nginx-deploy

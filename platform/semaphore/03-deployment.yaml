@@ -18,6 +18,7 @@ spec:
         checksum/config: 2ea063db8822f2bd378983ddd30ee650f55774314157758b052834f3fb7d583a
         checksum/service-env: explicit-port-3000
         checksum/history-policy: 100-per-template
+        checksum/nginx-automation: fba3fcac683c296fe9552fb387997fef10391e0ddf77eda0f9d64da01b9a7d02
     spec:
       nodeSelector:
         kubernetes.io/hostname: pi5
@@ -112,6 +113,9 @@ spec:
           mountPath: /etc/ssh/ssh_config.d/semaphore.conf
           subPath: ssh.conf
           readOnly: true
+        - name: nginx-ssh
+          mountPath: /run/secrets/nginx-ssh
+          readOnly: true
         startupProbe:
           httpGet:
             path: /api/ping
@@ -166,5 +170,9 @@ spec:
         configMap:
           name: semaphore-local-tasks
           defaultMode: 365
+      - name: nginx-ssh
+        secret:
+          secretName: semaphore-nginx-ssh
+          defaultMode: 288
       terminationGracePeriodSeconds: 60
       enableServiceLinks: false

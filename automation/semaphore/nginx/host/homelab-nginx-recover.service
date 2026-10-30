@@ -1,0 +1,14 @@
+[Unit]
+Description=Recover an interrupted nginx Git deployment before nginx starts
+Before=nginx.service
+After=local-fs.target
+ConditionPathExists=/var/lib/homelab-nginx/pending.json
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/homelab-nginx-deploy --recover-boot
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

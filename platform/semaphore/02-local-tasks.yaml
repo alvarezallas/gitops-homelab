@@ -31,3 +31,11 @@ data:
 
     '
   ssh.conf: "Host *\n    StrictHostKeyChecking yes\n    UserKnownHostsFile /home/semaphore/.ssh/known_hosts\n"
+  nginx-sync.sh: "#!/bin/bash\nset -euo pipefail\nexec timeout -s TERM -k 10 190 ssh\
+    \ -T -F /dev/null \\\n  -i /run/secrets/nginx-ssh/id_ed25519 \\\n  -o IdentitiesOnly=yes\
+    \ -o BatchMode=yes \\\n  -o StrictHostKeyChecking=yes \\\n  -o UserKnownHostsFile=/opt/homelab/tasks/pi5_known_hosts\
+    \ \\\n  -o ConnectTimeout=10 -o ServerAliveInterval=10 -o ServerAliveCountMax=3\
+    \ \\\n  -o ClearAllForwardings=yes \\\n  semaphore-nginx@192.168.1.163 deploy-nginx\n"
+  pi5_known_hosts: '192.168.1.163 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAySde60TUInn3W3ycgxAlF9nwotl5yoSg26h4+LYcpo
+
+    '
