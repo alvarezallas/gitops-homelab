@@ -1,0 +1,167 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: semaphore
+  namespace: semaphore
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: semaphore
+  template:
+    metadata:
+      labels:
+        app: semaphore
+      annotations:
+        checksum/config: 2ea063db8822f2bd378983ddd30ee650f55774314157758b052834f3fb7d583a
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: pi5
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: semaphore
+        image: docker.io/semaphoreui/semaphore:v2.19.17@sha256:9ec6b4ebc0f1028399fad22beb70bb0ae8d3f785d9b0bb30f23ccde53c3300dd
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: semaphore-config
+        env:
+        - name: SEMAPHORE_DB_USER_FILE
+          value: /run/secrets/database/username
+        - name: SEMAPHORE_DB_PASS_FILE
+          value: /run/secrets/database/password
+        - name: SEMAPHORE_ADMIN_PASSWORD_FILE
+          value: /run/secrets/web/password
+        - name: SEMAPHORE_ACCESS_KEY_ENCRYPTION
+          valueFrom:
+            secretKeyRef:
+              name: semaphore-web-auth
+              key: access-key-encryption
+        - name: SEMAPHORE_COOKIE_HASH
+          valueFrom:
+            secretKeyRef:
+              name: semaphore-web-auth
+              key: cookie-hash
+        - name: SEMAPHORE_COOKIE_ENCRYPTION
+          valueFrom:
+            secretKeyRef:
+              name: semaphore-web-auth
+              key: cookie-encryption
+        - name: SEMAPHORE_OPTION_ENCRYPTION
+          valueFrom:
+            secretKeyRef:
+              name: semaphore-web-auth
+              key: option-encryption
+        ports:
+        - name: http
+          containerPort: 3000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+            ephemeral-storage: 256Mi
+          limits:
+            cpu: '1'
+            memory: 768Mi
+            ephemeral-storage: 2Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: config
+          mountPath: /etc/semaphore
+        - name: data
+          mountPath: /var/lib/semaphore
+        - name: home
+          mountPath: /home/semaphore
+        - name: tmp
+          mountPath: /tmp
+        - name: tasks-cache
+          mountPath: /tmp/semaphore
+        - name: db-auth
+          mountPath: /run/secrets/database
+          readOnly: true
+        - name: web-auth
+          mountPath: /run/secrets/web
+          readOnly: true
+        - name: postgres-ca
+          mountPath: /etc/semaphore/postgresql-ca
+          readOnly: true
+        - name: local-tasks
+          mountPath: /opt/homelab/tasks
+          readOnly: true
+        - name: local-tasks
+          mountPath: /etc/ssh/ssh_config.d/semaphore.conf
+          subPath: ssh.conf
+          readOnly: true
+        startupProbe:
+          httpGet:
+            path: /api/ping
+            port: http
+          failureThreshold: 60
+          periodSeconds: 5
+          timeoutSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /api/ping
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /api/ping
+            port: http
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 5
+      volumes:
+      - name: config
+        emptyDir:
+          sizeLimit: 32Mi
+      - name: data
+        emptyDir:
+          sizeLimit: 32Mi
+      - name: home
+        emptyDir:
+          sizeLimit: 128Mi
+      - name: tmp
+        emptyDir:
+          sizeLimit: 128Mi
+      - name: tasks-cache
+        emptyDir:
+          sizeLimit: 1Gi
+      - name: db-auth
+        secret:
+          secretName: semaphore-db-auth
+          defaultMode: 288
+      - name: web-auth
+        secret:
+          secretName: semaphore-web-auth
+          items:
+          - key: password
+            path: password
+          defaultMode: 288
+      - name: postgres-ca
+        configMap:
+          name: postgresql-ca
+      - name: local-tasks
+        configMap:
+          name: semaphore-local-tasks
+          defaultMode: 365
+      terminationGracePeriodSeconds: 60

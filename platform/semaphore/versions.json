@@ -1,0 +1,23 @@
+{
+  "release": "v2.19.17",
+  "published_at": "2026-10-20T07:52:57Z",
+  "release_url": "https://github.com/semaphoreui/semaphore/releases/tag/v2.19.17",
+  "image": "docker.io/semaphoreui/semaphore:v2.19.17@sha256:9ec6b4ebc0f1028399fad22beb70bb0ae8d3f785d9b0bb30f23ccde53c3300dd",
+  "architecture": "arm64",
+  "user": "1001",
+  "entrypoint": [
+    "/sbin/tini",
+    "--"
+  ],
+  "cmd": [
+    "/usr/local/bin/server-wrapper"
+  ],
+  "working_dir": "/home/semaphore",
+  "volumes": null,
+  "source_hashes": {
+    "api\\router.go": "ffadf28a048707be96b6cb8ddb93ac43eef996a1868835b5bf93ac19f5031668",
+    "util\\config.go": "e0e54908ed542d42bbcc164b4fcfed8b87ad3928dea11f2a752c479f52fa269b",
+    "deployment\\docker\\server\\Dockerfile": "4a1c174c566ba0cd60a4b67d2ae50e92aa1a5d28288c7b2fb5d90afb88229c1d",
+    "deployment\\docker\\server\\server-wrapper": "a91a167511268fae5041d832572f4e791ea3e099e625dab3c1ac95620d86c456"
+  }
+}

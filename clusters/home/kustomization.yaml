@@ -11,3 +11,4 @@ resources:
 - cnpg-operator.yaml
 - postgresql.yaml
 - pgadmin.yaml
+- semaphore.yaml
