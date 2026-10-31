@@ -4,11 +4,10 @@ metadata:
   name: mailpit-web
   namespace: onthemanga
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: mailpit
   ports:
   - name: http
     port: 8025
     targetPort: http
-    nodePort: 30093
