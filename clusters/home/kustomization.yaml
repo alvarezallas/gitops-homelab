@@ -14,3 +14,4 @@ resources:
 - semaphore.yaml
 - onthemanga.yaml
 - wireguard.yaml
+- certificates.yaml

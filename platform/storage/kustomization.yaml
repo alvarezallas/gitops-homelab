@@ -10,3 +10,4 @@ resources:
 - 06-onthemanga-objects-pv.yaml
 - 07-onthemanga-mailpit-pv.yaml
 - 08-wireguard-state-pv.yaml
+- 09-certificates-acme-pv.yaml

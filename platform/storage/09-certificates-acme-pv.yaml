@@ -1,0 +1,45 @@
+{
+  "apiVersion": "v1",
+  "kind": "PersistentVolume",
+  "metadata": {
+    "name": "certificates-acme-pv",
+    "annotations": {
+      "argocd.argoproj.io/sync-options": "Prune=false,Delete=false"
+    }
+  },
+  "spec": {
+    "capacity": {
+      "storage": "1Gi"
+    },
+    "accessModes": [
+      "ReadWriteOnce"
+    ],
+    "volumeMode": "Filesystem",
+    "storageClassName": "",
+    "persistentVolumeReclaimPolicy": "Retain",
+    "claimRef": {
+      "namespace": "certificates",
+      "name": "acme-state"
+    },
+    "local": {
+      "path": "/var/lib/homelab-apps/certificates"
+    },
+    "nodeAffinity": {
+      "required": {
+        "nodeSelectorTerms": [
+          {
+            "matchExpressions": [
+              {
+                "key": "kubernetes.io/hostname",
+                "operator": "In",
+                "values": [
+                  "pi5"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
