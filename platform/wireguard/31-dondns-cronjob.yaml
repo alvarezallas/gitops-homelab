@@ -1,0 +1,145 @@
+{
+  "apiVersion": "batch/v1",
+  "kind": "CronJob",
+  "metadata": {
+    "name": "dondns",
+    "namespace": "wireguard",
+    "annotations": {
+      "argocd.argoproj.io/sync-options": "Prune=false,Delete=false"
+    }
+  },
+  "spec": {
+    "schedule": "*/5 * * * *",
+    "timeZone": "Europe/Madrid",
+    "suspend": true,
+    "concurrencyPolicy": "Forbid",
+    "startingDeadlineSeconds": 120,
+    "successfulJobsHistoryLimit": 2,
+    "failedJobsHistoryLimit": 2,
+    "jobTemplate": {
+      "spec": {
+        "activeDeadlineSeconds": 100,
+        "backoffLimit": 0,
+        "ttlSecondsAfterFinished": 86400,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "dondns"
+            }
+          },
+          "spec": {
+            "restartPolicy": "Never",
+            "nodeSelector": {
+              "kubernetes.io/hostname": "pi5"
+            },
+            "tolerations": [
+              {
+                "key": "node-role.kubernetes.io/control-plane",
+                "operator": "Exists",
+                "effect": "NoSchedule"
+              }
+            ],
+            "automountServiceAccountToken": false,
+            "enableServiceLinks": false,
+            "dnsPolicy": "None",
+            "dnsConfig": {
+              "nameservers": [
+                "1.1.1.1",
+                "9.9.9.9"
+              ],
+              "options": [
+                {
+                  "name": "timeout",
+                  "value": "2"
+                },
+                {
+                  "name": "attempts",
+                  "value": "2"
+                }
+              ]
+            },
+            "securityContext": {
+              "runAsNonRoot": true,
+              "runAsUser": 10001,
+              "runAsGroup": 10001,
+              "fsGroup": 10001,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "containers": [
+              {
+                "name": "dondns",
+                "image": "docker.io/library/python:3.13-alpine@sha256:4dec53ac220d1cca3d31d40d346e4c2cd3540c1d7eb058ed70a3f94934728cf2",
+                "imagePullPolicy": "IfNotPresent",
+                "command": [
+                  "python",
+                  "-B",
+                  "/opt/dondns/update.py"
+                ],
+                "env": [
+                  {
+                    "name": "PYTHONDONTWRITEBYTECODE",
+                    "value": "1"
+                  },
+                  {
+                    "name": "PYTHONUNBUFFERED",
+                    "value": "1"
+                  }
+                ],
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "10m",
+                    "memory": "32Mi"
+                  },
+                  "limits": {
+                    "cpu": "100m",
+                    "memory": "96Mi",
+                    "ephemeral-storage": "32Mi"
+                  }
+                },
+                "volumeMounts": [
+                  {
+                    "name": "script",
+                    "mountPath": "/opt/dondns",
+                    "readOnly": true
+                  },
+                  {
+                    "name": "credentials",
+                    "mountPath": "/run/dondns",
+                    "readOnly": true
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "script",
+                "configMap": {
+                  "name": "dondns-updater",
+                  "defaultMode": 292
+                }
+              },
+              {
+                "name": "credentials",
+                "secret": {
+                  "secretName": "dondns-credentials",
+                  "defaultMode": 288
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
