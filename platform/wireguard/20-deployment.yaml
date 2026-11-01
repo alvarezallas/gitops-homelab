@@ -103,13 +103,10 @@
               {
                 "name": "TZ",
                 "value": "Europe/Madrid"
-              }
-            ],
-            "envFrom": [
+              },
               {
-                "secretRef": {
-                  "name": "wireguard-bootstrap"
-                }
+                "name": "PATH",
+                "value": "/opt/homelab/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
               }
             ],
             "securityContext": {
@@ -202,7 +199,22 @@
           {
             "name": "policy",
             "configMap": {
-              "name": "wireguard-network-policy"
+              "name": "wireguard-network-policy",
+              "defaultMode": 365,
+              "items": [
+                {
+                  "key": "configure.cjs",
+                  "path": "configure.cjs"
+                },
+                {
+                  "key": "iptables",
+                  "path": "bin/iptables"
+                },
+                {
+                  "key": "ip6tables",
+                  "path": "bin/ip6tables"
+                }
+              ]
             }
           },
           {
