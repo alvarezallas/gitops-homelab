@@ -76,3 +76,17 @@ Siete pruebas offline: rechazo de IP privada/CGNAT/IPv6, discrepancia entre fuen
 Durante la activación el usuario introdujo la clave en pi5. La primera ejecución devolvió un fallo HTTPS genérico. El diagnóstico posterior confirmó que el proveedor responde con un User-Agent explícito del cliente; se añadió y se distinguieron errores HTTP de errores de zona. DonDNS respondió `The DNS Zone doesn't exist` para vpn.bearsfamily.es. La credencial queda en el Secret, el CronJob sigue pausado y el endpoint WireGuard permanece con su IP anterior hasta validar el registro real. Esta observación no equivale a actualización DNS exitosa.
 
 Fuentes: [API DonDNS y preparación del registro](https://dondominio.dev/es/dondns/docs/api/), [cliente oficial](https://github.com/dondominio/dondns-bash/), [periodicidad documentada](https://dondominio.dev/es/dondns/docs/linux/).
+
+
+## Comprobación posterior de delegación y registro — 01/11/2026
+
+Las capturas aportadas muestran bearsfamily.es activo en DonDominio y DNS configurados como ns1/ns2.dondominio.com. Consulta directa desde pi5 confirmó que ambos servidores de DonDominio sirven la zona. **No hace falta cambiar esos nameservers según esta evidencia.**
+
+Quedan dos condiciones distintas:
+
+1. El servidor del registro .es consultado (a.nic.es) devuelve NXDOMAIN para bearsfamily.es; Cloudflare y Google también. La delegación pública aún no aparece en esas respuestas. Esperar su publicación y revisar con DonDominio si persiste; no se promete un plazo fijo.
+2. Al consultar A vpn.bearsfamily.es directamente en ns1 y ns2 se devuelve CNAME hacia hostingsrv137.dondominio.com, correspondiente al alojamiento, no un A hacia casa. Puede proceder del wildcard de parking: la consulta no acredita que exista una entrada CNAME explícita llamada vpn.
+
+En la pestaña **Zona DNS** crea un **A explícito, host vpn, valor83.61.157.59** (IP pública comprobada en esta sesión), TTL300 si está disponible. Si existe un CNAME explícito para vpn, sustituye únicamente ese registro por el A. Si la respuesta procede de un wildcard de parking, basta con crear el A explícito; no borrar el wildcard ni otros registros por inferencia. No cambiar @, www, MX o nameservers para esta VPN.
+
+Después comprobar A directamente en los servidores DonDominio y la delegación/resolución pública. Ejecutar el asistente con --activate cuando el nombre ya resuelva. El reintento con el cliente HTTPS corregido confirmó el código seguro dns_zone_missing; CronJob pausado, Secret conservado y endpoint WireGuard sin cambio.
