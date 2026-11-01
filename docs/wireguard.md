@@ -93,3 +93,10 @@ Para parar temporalmente, escala el Deployment a cero; al tener sync manual no s
 La VPN está dentro del clúster: si pi5 o el clúster fallan, no proporciona un canal de rescate independiente.
 
 Fuentes: [wg-easy v15.5.0](https://github.com/wg-easy/wg-easy/releases/tag/v15.5.0), [configuración oficial](https://wg-easy.github.io/wg-easy/latest/advanced/config/optional-config/), [WireGuard y rutas](https://www.wireguard.com/netns/).
+
+
+## Estado vigente — 02/11/2026: DonDNS activo
+
+Delegación .es publicada a ns1/ns2.dondominio.com; ambos autoritativos y Google/Cloudflare devuelven A vpn.bearsfamily.es→83.61.157.59, TTL600s en esta comprobación. Activación reintentada con la credencial ya guardada y Job exitoso. CronJob wireguard/dondns activo (suspend=false), horario cada5min. wg-easy usa vpn.bearsfamily.es:51820; conserva su cliente existente, claves y pod Ready. Trece Applications Synced/Healthy. Este estado sustituye las notas históricas de horario pausado/registro o delegación pendientes.
+
+Los perfiles ya descargados deben cambiar únicamente Endpoint a vpn.bearsfamily.es:51820 o descargarse de nuevo sin regenerar claves. Falta acreditar conexión desde una red externa si aún no se ha probado. Los dominios web siguen en .aa; no se ejecutó su migración ni emisión de certificados.

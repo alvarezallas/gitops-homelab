@@ -90,3 +90,10 @@ Quedan dos condiciones distintas:
 En la pestaña **Zona DNS** crea un **A explícito, host vpn, valor83.61.157.59** (IP pública comprobada en esta sesión), TTL300 si está disponible. Si existe un CNAME explícito para vpn, sustituye únicamente ese registro por el A. Si la respuesta procede de un wildcard de parking, basta con crear el A explícito; no borrar el wildcard ni otros registros por inferencia. No cambiar @, www, MX o nameservers para esta VPN.
 
 Después comprobar A directamente en los servidores DonDominio y la delegación/resolución pública. Ejecutar el asistente con --activate cuando el nombre ya resuelva. El reintento con el cliente HTTPS corregido confirmó el código seguro dns_zone_missing; CronJob pausado, Secret conservado y endpoint WireGuard sin cambio.
+
+
+## Estado vigente — 02/11/2026: DonDNS activo
+
+Delegación .es publicada a ns1/ns2.dondominio.com; ambos autoritativos y Google/Cloudflare devuelven A vpn.bearsfamily.es→83.61.157.59, TTL600s en esta comprobación. Activación reintentada con la credencial ya guardada y Job exitoso. CronJob wireguard/dondns activo (suspend=false), horario cada5min. wg-easy usa vpn.bearsfamily.es:51820; conserva su cliente existente, claves y pod Ready. Trece Applications Synced/Healthy. Este estado sustituye las notas históricas de horario pausado/registro o delegación pendientes.
+
+Los perfiles ya descargados deben cambiar únicamente Endpoint a vpn.bearsfamily.es:51820 o descargarse de nuevo sin regenerar claves. Falta acreditar conexión desde una red externa si aún no se ha probado. Los dominios web siguen en .aa; no se ejecutó su migración ni emisión de certificados.
