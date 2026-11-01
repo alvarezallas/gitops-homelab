@@ -1,0 +1,31 @@
+{
+  "apiVersion": "argoproj.io/v1alpha1",
+  "kind": "Application",
+  "metadata": {
+    "name": "homelab-wireguard",
+    "namespace": "argocd",
+    "annotations": {
+      "argocd.argoproj.io/sync-options": "Prune=false,Delete=false"
+    }
+  },
+  "spec": {
+    "project": "homelab-platform",
+    "source": {
+      "repoURL": "git@github.com:alvarezallas/gitops-homelab.git",
+      "targetRevision": "main",
+      "path": "platform/wireguard"
+    },
+    "destination": {
+      "server": "https://kubernetes.default.svc",
+      "namespace": "wireguard"
+    },
+    "syncPolicy": {
+      "syncOptions": [
+        "ServerSideApply=true",
+        "DisableClientSideApplyMigration=true",
+        "FailOnSharedResource=true"
+      ]
+    },
+    "revisionHistoryLimit": 10
+  }
+}

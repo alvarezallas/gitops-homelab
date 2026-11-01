@@ -13,3 +13,4 @@ resources:
 - pgadmin.yaml
 - semaphore.yaml
 - onthemanga.yaml
+- wireguard.yaml

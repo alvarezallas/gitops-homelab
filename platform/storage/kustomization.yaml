@@ -9,3 +9,4 @@ resources:
 - 05-persistentvolumeclaim-torrents-pvc.yaml
 - 06-onthemanga-objects-pv.yaml
 - 07-onthemanga-mailpit-pv.yaml
+- 08-wireguard-state-pv.yaml

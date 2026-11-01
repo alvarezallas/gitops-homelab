@@ -1,0 +1,224 @@
+{
+  "apiVersion": "apps/v1",
+  "kind": "Deployment",
+  "metadata": {
+    "name": "wg-easy",
+    "namespace": "wireguard",
+    "annotations": {
+      "argocd.argoproj.io/sync-options": "Prune=false,Delete=false"
+    }
+  },
+  "spec": {
+    "replicas": 1,
+    "strategy": {
+      "type": "Recreate"
+    },
+    "selector": {
+      "matchLabels": {
+        "app": "wg-easy"
+      }
+    },
+    "template": {
+      "metadata": {
+        "labels": {
+          "app": "wg-easy"
+        }
+      },
+      "spec": {
+        "nodeSelector": {
+          "kubernetes.io/hostname": "pi5"
+        },
+        "tolerations": [
+          {
+            "key": "node-role.kubernetes.io/control-plane",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          }
+        ],
+        "automountServiceAccountToken": false,
+        "enableServiceLinks": false,
+        "terminationGracePeriodSeconds": 45,
+        "securityContext": {
+          "runAsUser": 0,
+          "runAsGroup": 0,
+          "seccompProfile": {
+            "type": "RuntimeDefault"
+          }
+        },
+        "containers": [
+          {
+            "name": "wg-easy",
+            "image": "ghcr.io/wg-easy/wg-easy@sha256:4d19a233a70d519d60f55f7e2cf67da45ccdd4f32a20b4c73ca012580785f8ed",
+            "imagePullPolicy": "IfNotPresent",
+            "command": [
+              "sh",
+              "-c",
+              "node /opt/homelab/configure.cjs && exec /usr/bin/dumb-init node server/index.mjs"
+            ],
+            "ports": [
+              {
+                "name": "wireguard",
+                "containerPort": 51820,
+                "hostPort": 51820,
+                "hostIP": "192.168.1.163",
+                "protocol": "UDP"
+              },
+              {
+                "name": "web",
+                "containerPort": 51821,
+                "hostPort": 51821,
+                "hostIP": "127.0.0.1",
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "DEBUG",
+                "value": ""
+              },
+              {
+                "name": "PORT",
+                "value": "51821"
+              },
+              {
+                "name": "HOST",
+                "value": "0.0.0.0"
+              },
+              {
+                "name": "INSECURE",
+                "value": "false"
+              },
+              {
+                "name": "DISABLE_VERSION_CHECK",
+                "value": "true"
+              },
+              {
+                "name": "DISABLE_IPV6",
+                "value": "false"
+              },
+              {
+                "name": "TRUSTED_PROXIES",
+                "value": "10.244.0.1"
+              },
+              {
+                "name": "TZ",
+                "value": "Europe/Madrid"
+              }
+            ],
+            "envFrom": [
+              {
+                "secretRef": {
+                  "name": "wireguard-bootstrap"
+                }
+              }
+            ],
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "readOnlyRootFilesystem": true,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ],
+                "add": [
+                  "NET_ADMIN"
+                ]
+              }
+            },
+            "resources": {
+              "requests": {
+                "cpu": "100m",
+                "memory": "128Mi"
+              },
+              "limits": {
+                "cpu": "1",
+                "memory": "512Mi",
+                "ephemeral-storage": "256Mi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "state",
+                "mountPath": "/etc/wireguard"
+              },
+              {
+                "name": "policy",
+                "mountPath": "/opt/homelab",
+                "readOnly": true
+              },
+              {
+                "name": "tmp",
+                "mountPath": "/tmp"
+              },
+              {
+                "name": "run",
+                "mountPath": "/run"
+              }
+            ],
+            "startupProbe": {
+              "exec": {
+                "command": [
+                  "sh",
+                  "-c",
+                  "wg show wg0 >/dev/null && wget -q -O /dev/null http://127.0.0.1:51821/"
+                ]
+              },
+              "timeoutSeconds": 5,
+              "periodSeconds": 3,
+              "failureThreshold": 40
+            },
+            "readinessProbe": {
+              "exec": {
+                "command": [
+                  "sh",
+                  "-c",
+                  "wg show wg0 >/dev/null && wget -q -O /dev/null http://127.0.0.1:51821/"
+                ]
+              },
+              "timeoutSeconds": 5,
+              "periodSeconds": 10,
+              "failureThreshold": 3
+            },
+            "livenessProbe": {
+              "exec": {
+                "command": [
+                  "sh",
+                  "-c",
+                  "wg show wg0 >/dev/null && wget -q -O /dev/null http://127.0.0.1:51821/"
+                ]
+              },
+              "timeoutSeconds": 5,
+              "periodSeconds": 20,
+              "failureThreshold": 3
+            }
+          }
+        ],
+        "volumes": [
+          {
+            "name": "state",
+            "persistentVolumeClaim": {
+              "claimName": "wireguard-state"
+            }
+          },
+          {
+            "name": "policy",
+            "configMap": {
+              "name": "wireguard-network-policy"
+            }
+          },
+          {
+            "name": "tmp",
+            "emptyDir": {
+              "sizeLimit": "128Mi"
+            }
+          },
+          {
+            "name": "run",
+            "emptyDir": {
+              "sizeLimit": "32Mi"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
