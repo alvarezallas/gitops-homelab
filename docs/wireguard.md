@@ -40,7 +40,7 @@ nginx acepta también el PodCIDR de pi5 porque el tráfico VPN llega tras NAT co
 
 **Endpoint inicial:** IP pública detectada durante la instalación, guardada en la configuración privada del servidor. `vpn.bearsfamily.es` no devuelve registro A en las consultas realizadas. Hasta configurar el dominio y DDNS, un cambio de IP pública obliga a actualizar el endpoint de los perfiles. Abrir un puerto no demuestra por sí solo ausencia de CGNAT; falta handshake desde 4G/5G para acreditar la entrada WAN.
 
-Cuando esté activo el dominio: crea A `vpn.bearsfamily.es` hacia tu IPv4 pública y configura DonDNS con credencial de mínimo alcance, fuera de Git. Actualiza el host de los perfiles en wg-easy y vuelve a descargarlos. No se ha instalado CronJob DDNS porque falta configurar el dominio y aportar la credencial por un canal privado.
+DonDNS está preparado como CronJob `wireguard/dondns`, cada cinco minutos, inicialmente pausado. El usuario ya introdujo la DonDNS Key de forma privada en pi5. La API responde que la zona DNS no existe; falta activar el servicio DNS/crear A `vpn` y validar propagación. Hasta entonces el endpoint conserva la IP inicial. Guía: [DonDNS](dondns.md) en GitOps y `../dondns-instalacion-20261101/README.md` en la entrega. El asistente `automation/dondns/configure.py --activate` reutiliza el Secret, valida API/DNS, activa el horario en Git y cambia el host; después hay que actualizar los perfiles descargados.
 
 ## Permisos y funcionamiento
 
