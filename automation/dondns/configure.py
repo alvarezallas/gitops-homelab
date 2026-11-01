@@ -15,8 +15,8 @@ def main():
   if not sys.stdin.isatty():raise RuntimeError('Interactive terminal required')
   username=input('DonDominio username: ').strip();key=getpass.getpass('DonDNS Key (hidden): ').strip()
   if not username or not key or any(c in username+key for c in '\r\n'):raise RuntimeError('Invalid credentials')
-  secret={'apiVersion':'v1','kind':'Secret','metadata':{'name':'dondns-credentials','namespace':'wireguard'},'type':'Opaque','stringData':{'username':username,'apikey':key}}
-  run(K+['apply','-f','-'],json.dumps(secret));key=None;secret=None
+  secret={'apiVersion':'v1','kind':'Secret','metadata':{'name':'dondns-credentials','namespace':'wireguard'},'type':'Opaque','data':{'username':base64.b64encode(username.encode()).decode(),'apikey':base64.b64encode(key.encode()).decode()}}
+  run(K+['apply','--server-side','--field-manager=dondns-operator','-f','-'],json.dumps(secret));key=None;secret=None
   print('Credentials stored only in Kubernetes Secret wireguard/dondns-credentials.')
  cron=json.loads(run(K+['get','cronjob','dondns','-n','wireguard','-o','json']))
  jobname='dondns-activate-'+str(int(time.time()))
