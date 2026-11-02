@@ -1,6 +1,6 @@
 # Dashboard del clúster bearsfamily
 
-URL: https://grafana.bearsfamily.aa/d/bearsfamily-cluster
+URL: https://grafana.bearsfamily.es/d/bearsfamily-cluster
 Carpeta Homelab, dashboard Bearsfamily · Estado completo del clúster, UID bearsfamily-cluster.
 
 Actualización30s, muestreo30s, tasas de la cabecera promediadas en1min. Arriba CPU en núcleos utilizados, RAM y discos raíz en bytes, RX/TX de interfaces físicas y nodos Ready. Se muestran capacidades y salud (pods no Ready, reinicios, objetivos caídos, PVC sin enlazar, presión de nodo), seguido de consumo actual por nodo. Los filtros Namespace/Pod afectan a los históricos inferiores.

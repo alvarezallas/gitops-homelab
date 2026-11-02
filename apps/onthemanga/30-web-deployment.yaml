@@ -48,6 +48,8 @@ spec:
           value: Europe/Madrid
         - name: APP_BASE_URL
           value: https://onthemanga.bearsfamily.es
+        - name: APP_MAIL_FROM
+          value: noreply@onthemanga.bearsfamily.es
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true

@@ -9,7 +9,7 @@ Preparado26/10/2026 desde los manifiestos instalados y el estado real de CoreDNS
 | homelab-root | AppProject y seis Applications hijas |
 | homelab-storage | Namespaces de descargas, StorageClass, tres PV NFS y PVC existente |
 | homelab-flannel | CNI Flannel fijado por digest |
-| homelab-coredns-config | ConfigMap CoreDNS, incluida zona bearsfamily.aa |
+| homelab-coredns-config | ConfigMap CoreDNS, incluida zona bearsfamily.es |
 | homelab-monitoring | Prometheus, Grafana, kube-state-metrics y cuatro node-exporter |
 | homelab-downloads | qBittorrent y sus Services, WebUI30081 |
 | homelab-argocd | Argo CD3.5.6 gestionándose a sí mismo, excepto Secrets |
@@ -42,7 +42,7 @@ Autenticar Git mediante tu gestor de credenciales/GitHub; nunca poner PAT/contra
 
 ## 2. Dar a Argo acceso de lectura al repositorio
 
-Es un permiso diferente al acceso al clúster, que ya tiene. Para un repo privado puedes usar **Settings → Repositories → Connect Repo** en https://argocd.bearsfamily.aa:
+Es un permiso diferente al acceso al clúster, que ya tiene. Para un repo privado puedes usar **Settings → Repositories → Connect Repo** en https://argocd.bearsfamily.es:
 
 - HTTPS: URL sin credenciales y token de lectura del proveedor introducido solo en Argo; en GitHub limitarlo a ese repo y lectura de Contents. No pegar el token en chat, YAML o Git.
 - SSH: crear una clave de despliegue dedicada, registrar su parte pública en el repositorio con acceso **solo lectura**, e introducir la privada únicamente en la conexión Argo. No reutilizar la clave servidor de las Raspberry. Verificar host key del proveedor; no desactivar verificación SSH/TLS.
@@ -68,7 +68,7 @@ Antes, guardar un backup independiente y verificar servicios/PV/Secrets existent
 
 1. homelab-storage: PV12/PVC siguen Bound, NAS .164 y Retain; rechazar cualquier diff que cambie path/servidor/volumeName de forma inesperada.
 2. homelab-flannel: comprobar cuatro Ready y red; no actualizar imagen en la primera adopción.
-3. homelab-coredns-config: comprobar DNS interno, externo y bearsfamily.aa.
+3. homelab-coredns-config: comprobar DNS interno, externo y bearsfamily.es.
 4. homelab-monitoring: seis targets up y Grafana datasource correcto.
 5. homelab-downloads: web qBittorrent y PVC siguen funcionando; no restablecer contraseña ni editar archivos privados.
 6. homelab-argocd **al final**: SSA habilitado, sesión/health funcionando y acceso SSH/kubectl alternativo disponible.

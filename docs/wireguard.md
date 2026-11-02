@@ -4,7 +4,7 @@ Servidor instalado en Kubernetes, pi5 192.168.1.163. Application **homelab-wireg
 
 ## Entrar y conectar el móvil
 
-1. Desde casa abre **https://wireguard.bearsfamily.aa**. Usa el DNS doméstico 192.168.1.163. Se mantiene el certificado doméstico existente.
+1. Desde casa abre **https://wireguard.bearsfamily.es**. Usa el DNS doméstico 192.168.1.163. Se mantiene el certificado doméstico existente.
 2. Usuario **admin**. Para consultar la contraseña inicial, ejecuta en pi5, sin copiar su salida al chat:
 
    ```bash
@@ -13,7 +13,7 @@ Servidor instalado en Kubernetes, pi5 192.168.1.163. Application **homelab-wireg
 
 3. Activa TOTP desde tu perfil y conserva la recuperación de forma privada. Requiere tu aplicación autenticadora; no se ha activado automáticamente.
 4. Crea un cliente por dispositivo, por ejemplo `movil-alvaro`. Instala el cliente oficial WireGuard y escanea su QR desde tu panel. El QR contiene claves privadas: no compartirlo ni guardarlo en Git/OneDrive.
-5. Desactiva WiFi en el móvil y activa WireGuard. Comprueba handshake reciente en el panel, abre https://bearsfamily.aa y tus aplicaciones, accede al NAS y compara la IP de salida con la de casa. Prueba DNS y que no haya salida IPv6 directa. Repite por plataforma y configura bloqueo fuera de VPN si quieres impedir navegación directa al desconectar.
+5. Desactiva WiFi en el móvil y activa WireGuard. Comprueba handshake reciente en el panel, abre https://bearsfamily.es y tus aplicaciones, accede al NAS y compara la IP de salida con la de casa. Prueba DNS y que no haya salida IPv6 directa. Repite por plataforma y configura bloqueo fuera de VPN si quieres impedir navegación directa al desconectar.
 
 El Secret conserva la **contraseña inicial**. Si la cambias desde el panel, ese Secret no se actualiza por sí mismo. No restablecer el administrador para resolver una contraseña desactualizada sin revisar antes.
 

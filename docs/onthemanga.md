@@ -2,7 +2,7 @@
 
 Inicio: 30/10/2026. Publicación y verificación final: **31/10/2026 · Europe/Madrid**.
 
-Web: **https://onthemanga.bearsfamily.aa**. Usa los usuarios y contraseñas de la instalación original. Es una publicación doméstica en la LAN; DNS y certificado del homelab existentes. No se abrieron puertos del router ni se modificó la confianza de Windows.
+Web: **https://onthemanga.bearsfamily.es**. Usa los usuarios y contraseñas de la instalación original. Es una publicación doméstica en la LAN; DNS y certificado del homelab existentes. No se abrieron puertos del router ni se modificó la confianza de Windows.
 
 ## Resultado
 

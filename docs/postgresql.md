@@ -4,7 +4,7 @@ Una instancia PostgreSQL 17.11 en pi5. Datos en NAS 192.168.1.164:/mnt/d01tb/pos
 
 Orden manual: homelab-root, homelab-cnpg-operator, homelab-storage (recrear únicamente el PV libre al cambiar la ruta), homelab-postgresql, homelab-pgadmin. Sin auto-sync, prune ni force. Secrets creados fuera de Git: semaphore-db-auth, pgadmin-monitor-auth y pgadmin-web-auth en databases. El operador genera sus certificados.
 
-pgAdmin: https://pgadmin.bearsfamily.aa, usuario admin@bearsfamily.aa. Contraseña consultable localmente con kubectl; nunca se guarda en este repositorio. Conexión precargada con pgadmin_monitor (pg_monitor, no superusuario), TLS verify-full y CA pública montada. El passfile privado reside en /opt/pgadmin/data/storage/admin_bearsfamily.aa/monitor.pgpass en pi5.
+pgAdmin: https://pgadmin.bearsfamily.es, usuario admin@bearsfamily.aa. Contraseña consultable localmente con kubectl; nunca se guarda en este repositorio. Conexión precargada con pgadmin_monitor (pg_monitor, no superusuario), TLS verify-full y CA pública montada. El passfile privado reside en /opt/pgadmin/data/storage/admin_bearsfamily.aa/monitor.pgpass en pi5.
 
 La base semaphore es de semaphore_app; PUBLIC no tiene CONNECT. pgAdmin conserva sus ajustes en un PV local de pi5, /opt/pgadmin/data, y no puede migrar automáticamente. El servicio PostgreSQL es interno. Argo CD protege volúmenes y namespaces frente a borrado accidental.
 
