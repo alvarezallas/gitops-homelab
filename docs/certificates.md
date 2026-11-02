@@ -71,3 +71,16 @@ La sesión staging e0489ad1fc3b485f92be1afbe2a4bac9 terminó con exit0. Validaci
 Iniciada una única solicitud de producción, sesión8db5232d9c4b4e04adbf0fa96dbe9661. Estado actual y valores exactos en production-status.json / estado-publico.json. Se ha pedido al usuario editar los dos TXT anteriores para publicar los de producción. Los anteriores ya no son necesarios para staging.
 
 No se ha emitido aún producción ni cambiado nginx o los nombres de las webs. Después de emitir quedan la validación de cadena pública, copia privada cifrada y decisión de renovación desatendida.
+
+
+## Certificado real emitido y validado — 02/11/2026
+
+Producción completada (exit0), sesión 4c9285e254ed4739ae727ee9f3784235. Cubre bearsfamily.es y *.bearsfamily.es. Emisor Let's Encrypt YE1. Vigente hasta 31/01/2027 a las 20:03:29 UTC (21:03:29 en Madrid). Verificados SAN, vigencia, clave correspondiente, permisos privados y cadena pública con comprobación del nombre grafana.bearsfamily.es mediante OpenSSL.
+
+Estado privado persistente en pi5: /var/lib/homelab-apps/certificates/production/config/live/bearsfamily.es/ (en el contenedor: /acme/production/config/live/bearsfamily.es/). No copiar privkey.pem, cuentas ni registros privados a Git, OneDrive o al chat.
+
+Copia cifrada AES256 en /var/backups/homelab-certificates/acme-20261102T210232Z.tar.gpg. Se comprobó descifrado aislado, correspondencia de clave y conservación de cuentas. Contraseña únicamente en /root/.config/homelab-certificates/backup-passphrase. Copia local en pi5, todavía sin respaldo externo ni programación periódica.
+
+La creación inicial está completada. Los dos TXT de esta validación ya pueden eliminarse; no eliminar otros registros DNS. nginx sigue con su certificado anterior y las webs conservan .aa. Este certificado no cubre .aa. No se ha ejecutado la migración de dominio ni instalado el nuevo certificado en nginx.
+
+Renovación automática pendiente: el método actual requiere nuevos TXT manuales y no permite renovación desatendida. DonDNS para actualizar A no sustituye una integración DNS-01 con escritura TXT. Resolver esta integración y la instalación/distribución antes de considerar completado el ciclo de vida de certificados.
