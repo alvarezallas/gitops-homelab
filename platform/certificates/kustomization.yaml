@@ -5,6 +5,8 @@
     "00-namespace.yaml",
     "10-pvc.yaml",
     "15-hooks.yaml",
-    "20-client.yaml"
+    "20-client.yaml",
+    "30-renew-hooks.yaml",
+    "31-renew-cronjob.yaml"
   ]
 }

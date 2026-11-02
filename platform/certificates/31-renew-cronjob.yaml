@@ -1,0 +1,133 @@
+{
+  "apiVersion": "batch/v1",
+  "kind": "CronJob",
+  "metadata": {
+    "name": "certbot-renew",
+    "namespace": "certificates"
+  },
+  "spec": {
+    "schedule": "17 3,15 * * *",
+    "timeZone": "Europe/Madrid",
+    "suspend": true,
+    "concurrencyPolicy": "Forbid",
+    "startingDeadlineSeconds": 3600,
+    "successfulJobsHistoryLimit": 2,
+    "failedJobsHistoryLimit": 3,
+    "jobTemplate": {
+      "spec": {
+        "activeDeadlineSeconds": 4800,
+        "backoffLimit": 0,
+        "ttlSecondsAfterFinished": 604800,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "certbot-renew"
+            }
+          },
+          "spec": {
+            "automountServiceAccountToken": false,
+            "enableServiceLinks": false,
+            "nodeSelector": {
+              "kubernetes.io/hostname": "pi5"
+            },
+            "tolerations": [
+              {
+                "key": "node-role.kubernetes.io/control-plane",
+                "operator": "Exists",
+                "effect": "NoSchedule"
+              }
+            ],
+            "securityContext": {
+              "runAsUser": 0,
+              "runAsGroup": 0,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "terminationGracePeriodSeconds": 30,
+            "containers": [
+              {
+                "name": "renew",
+                "image": "docker.io/certbot/certbot:v5.9.0@sha256:13c94d8a7f0e135583d44a1574813b2404a936c5ba851897259e130a47777c17",
+                "imagePullPolicy": "IfNotPresent",
+                "command": [
+                  "python",
+                  "/opt/renew/runner.py"
+                ],
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "resources": {
+                  "requests": {
+                    "cpu": "100m",
+                    "memory": "128Mi"
+                  },
+                  "limits": {
+                    "cpu": "500m",
+                    "memory": "512Mi",
+                    "ephemeral-storage": "128Mi"
+                  }
+                },
+                "volumeMounts": [
+                  {
+                    "name": "state",
+                    "mountPath": "/acme"
+                  },
+                  {
+                    "name": "hooks",
+                    "mountPath": "/opt/renew",
+                    "readOnly": true
+                  },
+                  {
+                    "name": "credentials",
+                    "mountPath": "/run/dondominio",
+                    "readOnly": true
+                  },
+                  {
+                    "name": "tmp",
+                    "mountPath": "/tmp"
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "state",
+                "persistentVolumeClaim": {
+                  "claimName": "acme-state"
+                }
+              },
+              {
+                "name": "hooks",
+                "configMap": {
+                  "name": "certbot-renew-hooks",
+                  "defaultMode": 365
+                }
+              },
+              {
+                "name": "tmp",
+                "emptyDir": {
+                  "sizeLimit": "64Mi"
+                }
+              },
+              {
+                "name": "credentials",
+                "secret": {
+                  "secretName": "dondominio-dns-api",
+                  "defaultMode": 256
+                }
+              }
+            ],
+            "restartPolicy": "Never"
+          }
+        }
+      }
+    }
+  }
+}
