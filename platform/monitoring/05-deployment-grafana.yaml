@@ -41,7 +41,7 @@ spec:
               name: grafana-admin
               key: password
         - name: GF_SERVER_ROOT_URL
-          value: https://grafana.bearsfamily.aa
+          value: https://grafana.bearsfamily.es
         volumeMounts:
         - name: data
           mountPath: /var/lib/grafana

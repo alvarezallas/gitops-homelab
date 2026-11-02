@@ -18,10 +18,10 @@ K=['kubectl','--kubeconfig=/etc/kubernetes/admin.conf']
 secret=json.loads(subprocess.check_output(K+['-n','semaphore','get','secret','semaphore-web-auth','-o','json']))
 password=base64.b64decode(secret['data']['password']).decode()
 original=socket.getaddrinfo
-socket.getaddrinfo=lambda host,*a,**kw:original('127.0.0.1' if host=='semaphore.bearsfamily.aa' else host,*a,**kw)
-ctx=ssl.create_default_context(cafile='/etc/nginx/tls/homelab.crt')
+socket.getaddrinfo=lambda host,*a,**kw:original('127.0.0.1' if host=='semaphore.bearsfamily.es' else host,*a,**kw)
+ctx=ssl.create_default_context()
 op=urllib.request.build_opener(urllib.request.HTTPSHandler(context=ctx),urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
-base='https://semaphore.bearsfamily.aa'
+base='https://semaphore.bearsfamily.es'
 headers={'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','Origin':base,'Referer':base+'/'}
 
 def api(path,data=None,method=None):

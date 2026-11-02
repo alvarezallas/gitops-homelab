@@ -46,6 +46,8 @@ spec:
             -Djava.awt.headless=true -Djava.io.tmpdir=/tmp
         - name: TZ
           value: Europe/Madrid
+        - name: APP_BASE_URL
+          value: https://onthemanga.bearsfamily.es
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true

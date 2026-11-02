@@ -44,6 +44,7 @@ data:
     \ EphemeralReport\n  - ClusterEphemeralReport\n  - AdmissionReport\n  - ClusterAdmissionReport\n\
     \  - BackgroundScanReport\n  - ClusterBackgroundScanReport\n  - UpdateRequest\n"
   application.resourceTrackingMethod: annotation
+  url: https://argocd.bearsfamily.es
 kind: ConfigMap
 metadata:
   labels:

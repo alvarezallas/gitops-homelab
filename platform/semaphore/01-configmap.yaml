@@ -12,7 +12,7 @@ data:
   SEMAPHORE_CONFIG_PATH: /etc/semaphore
   SEMAPHORE_DB_PATH: /var/lib/semaphore
   SEMAPHORE_TMP_PATH: /tmp/semaphore
-  SEMAPHORE_WEB_ROOT: https://semaphore.bearsfamily.aa
+  SEMAPHORE_WEB_ROOT: https://semaphore.bearsfamily.es
   TZ: Europe/Madrid
   SEMAPHORE_SCHEDULE_TIMEZONE: Europe/Madrid
   SEMAPHORE_MAX_PARALLEL_TASKS: '1'

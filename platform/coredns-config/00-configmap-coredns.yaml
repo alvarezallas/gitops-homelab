@@ -6,7 +6,8 @@ data:
     \ :9153\n    forward . /etc/resolv.conf {\n       max_concurrent 1000\n    }\n\
     \    cache 30 {\n       disable success cluster.local\n       disable denial cluster.local\n\
     \    }\n    loop\n    reload\n    loadbalance\n}\n\nbearsfamily.aa:53 {\n errors\n\
-    \ cache 30\n forward . 192.168.1.163\n}\n"
+    \ cache 30\n forward . 192.168.1.163\n}\n\nbearsfamily.es:53 {\n errors\n cache\
+    \ 30\n forward . 192.168.1.163\n}\n"
 kind: ConfigMap
 metadata:
   name: coredns

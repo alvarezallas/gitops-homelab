@@ -168,17 +168,26 @@ def config_digest(sha):
 
 
 def probes(sha):
+    modern = 'server_name bearsfamily.es' in (RELEASES / sha / 'default.conf').read_text()
+    domain = 'bearsfamily.es' if modern else 'bearsfamily.aa'
+    ca = ['/etc/ssl/certs/ca-certificates.crt'] if modern else ['/etc/nginx/tls/homelab.crt']
+    hosts = [(domain, (200,)), ('argocd.'+domain, (200,)),
+             ('grafana.'+domain, (200,302)), ('prometheus.'+domain, (200,302)),
+             ('qbittorrent.'+domain, (200,)), ('pgadmin.'+domain, (200,302)),
+             ('semaphore.'+domain, (200,))]
+    if modern:
+        hosts += [('onthemanga.'+domain, (200,302)), ('wireguard.'+domain, (200,302))]
     results = {}
-    for host, allowed in HOSTS:
-        code = run(['/usr/bin/curl', '--silent', '--show-error', '--max-time', '6',
-                    '--cacert', '/etc/nginx/tls/homelab.crt', '--resolve', host + ':443:127.0.0.1',
-                    '--output', '/dev/null', '--write-out', '%{http_code}', 'https://' + host + '/'], timeout=8)
+    for host, allowed in hosts:
+        code = run(['/usr/bin/curl', '--silent', '--show-error', '--max-time', '10',
+                    '--cacert', ca[0], '--resolve', host + ':443:127.0.0.1',
+                    '--output', '/dev/null', '--write-out', '%{http_code}', 'https://' + host + '/'], timeout=12)
         assert int(code) in allowed, 'HTTPS health check failed for ' + host
         results[host] = int(code)
     for uri, relative in [('/', 'welcome.html'), ('/assets/bear-development.png', 'assets/bear-development.png')]:
-        body = run(['/usr/bin/curl', '--fail', '--silent', '--show-error', '--max-time', '6',
-                    '--cacert', '/etc/nginx/tls/homelab.crt', '--resolve', 'bearsfamily.aa:443:127.0.0.1',
-                    'https://bearsfamily.aa' + uri], timeout=8, binary=True)
+        body = run(['/usr/bin/curl', '--fail', '--silent', '--show-error', '--max-time', '10',
+                    '--cacert', ca[0], '--resolve', domain+':443:127.0.0.1',
+                    'https://'+domain + uri], timeout=12, binary=True)
         assert hashlib.sha256(body).digest() == hashlib.sha256((RELEASES / sha / relative).read_bytes()).digest(), 'Portal or logo differs from deployed release'
     return results
 

@@ -737,9 +737,9 @@ data:
     n\\n**Persistencia:** Prometheus conserva 15 dÃ­as. Panel administrado desde GitOps;\
     \ namespace/pod solo filtran los paneles histÃ³ricos.\"\n      }\n    }\n  ],\n\
     \  \"links\": [\n    {\n      \"title\": \"Prometheus\",\n      \"type\": \"link\"\
-    ,\n      \"url\": \"https://prometheus.bearsfamily.aa\",\n      \"targetBlank\"\
+    ,\n      \"url\": \"https://prometheus.bearsfamily.es\",\n      \"targetBlank\"\
     : true\n    },\n    {\n      \"title\": \"Argo CD\",\n      \"type\": \"link\"\
-    ,\n      \"url\": \"https://argocd.bearsfamily.aa\",\n      \"targetBlank\": true\n\
+    ,\n      \"url\": \"https://argocd.bearsfamily.es\",\n      \"targetBlank\": true\n\
     \    }\n  ]\n}\n"
   postgresql.json: '{"uid": "bearsfamily-postgresql", "title": "BearsFamily · PostgreSQL",
     "schemaVersion": 39, "version": 1, "refresh": "30s", "time": {"from": "now-6h",

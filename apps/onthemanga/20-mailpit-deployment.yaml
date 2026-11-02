@@ -46,7 +46,7 @@ spec:
         - name: MP_UI_AUTH_FILE
           value: /run/secrets/mailpit/auth
         - name: MP_ALLOWED_HOSTS
-          value: onthemanga-mail.bearsfamily.aa,mailpit,mailpit.onthemanga.svc
+          value: onthemanga-mail.bearsfamily.es,mailpit,mailpit.onthemanga.svc
         - name: MP_MAX_MESSAGES
           value: '0'
         - name: MP_DISABLE_VERSION_CHECK
