@@ -19,7 +19,7 @@ with open('/run/lock/homelab-nginx-deploy.lock','w') as lock:
  fcntl.flock(lock,fcntl.LOCK_EX)
  for f in ['cert.pem','chain.pem','fullchain.pem','privkey.pem']:assert (SOURCE/f).is_file()
  run(['openssl','x509','-in',str(SOURCE/'cert.pem'),'-checkend','86400','-noout'])
- for h in ['bearsfamily.es','argocd.bearsfamily.es','grafana.bearsfamily.es','prometheus.bearsfamily.es','qbittorrent.bearsfamily.es','pgadmin.bearsfamily.es','semaphore.bearsfamily.es','onthemanga.bearsfamily.es','wireguard.bearsfamily.es']:
+ for h in ['bearsfamily.es','argocd.bearsfamily.es','grafana.bearsfamily.es','prometheus.bearsfamily.es','qbittorrent.bearsfamily.es','pgadmin.bearsfamily.es','semaphore.bearsfamily.es','onthemanga.bearsfamily.es','wireguard.bearsfamily.es','jellyfin.bearsfamily.es']:
   run(['openssl','verify','-CApath','/etc/ssl/certs','-untrusted',str(SOURCE/'chain.pem'),'-verify_hostname',h,str(SOURCE/'cert.pem')])
  certpub=run(['openssl','x509','-in',str(SOURCE/'cert.pem'),'-pubkey','-noout'])
  assert certpub==run(['openssl','pkey','-in',str(SOURCE/'privkey.pem'),'-pubout'])
@@ -39,7 +39,7 @@ with open('/run/lock/homelab-nginx-deploy.lock','w') as lock:
   run(['nginx','-t','-q'])
   if not stage:
    run(['systemctl','reload','nginx'])
-   for h in ['bearsfamily.es','argocd.bearsfamily.es','grafana.bearsfamily.es','prometheus.bearsfamily.es','qbittorrent.bearsfamily.es','pgadmin.bearsfamily.es','semaphore.bearsfamily.es','onthemanga.bearsfamily.es','wireguard.bearsfamily.es']:
+   for h in ['bearsfamily.es','argocd.bearsfamily.es','grafana.bearsfamily.es','prometheus.bearsfamily.es','qbittorrent.bearsfamily.es','pgadmin.bearsfamily.es','semaphore.bearsfamily.es','onthemanga.bearsfamily.es','wireguard.bearsfamily.es','jellyfin.bearsfamily.es']:
     run(['curl','--silent','--show-error','--max-time','10','--resolve',h+':443:127.0.0.1','--output','/dev/null','https://'+h+'/'])
    run(['python3','/home/alvarense/gitops-homelab/automation/certificates/validate.py','production'])
    run(['python3','/home/alvarense/gitops-homelab/automation/certificates/backup.py'])
