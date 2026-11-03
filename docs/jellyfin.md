@@ -20,7 +20,7 @@ Si laTV antigua falla exclusivamente por confianzaTLS, alternativa solo en LAN: 
 - OrigenNAS:192.168.1.164:/mnt/d12tb/qbittorrent/downloads, mismo contenido que qBittorrent ve en /downloads. Jellyfin lo monta en /media/movies, NFS4.2 realmente ro, usuario10001sinroot. PV independiente jellyfin-media-pv y PVCmedia/jellyfin-media: no se ha reasignado nfs-pv-12/torrents-pvc.
 - Se añadió .ignore con incomplete/, *.!qB y *.part a la carpeta compartida para excluir temporales. No se han movido ni renombrado películas; qBittorrent conserva su funcionamiento/siembra.
 - Datos ySQLite: /var/lib/homelab-apps/jellyfin/config en pi5, PVjellyfin-config-pv/PVCjellyfin-config, Retain. Capacidad5Gi declarada, sin cuota física independiente. PostgreSQL compartido no interviene en esta aplicación.
-- Caché temporal8Gi en emptyDir. Solicitud250mCPU/512Mi; límites1CPU/1536Mi. Vídeo por reproducción directa o remux; transcodificación de vídeo deshabilitada para bearsfamily. Audio puede convertirse. Extracción de trickplay y capítulos desactivada para contener trabajo. Películas actualesH2641080p, audioAC3/EAC3 y subtítulosSubRip según indexación.
+- Caché temporal8Gi en emptyDir. Solicitud250mCPU/768Mi; límites1CPU/2Gi. Vídeo por reproducción directa o remux; transcodificación de vídeo deshabilitada para bearsfamily. Audio puede convertirse. Extracción de trickplay y capítulos desactivada para contener trabajo. Películas actualesH2641080p, audioAC3/EAC3 y subtítulosSubRip según indexación.
 - Escaneo horario60min, primer escaneo completado. Monitor en tiempo real desactivado por NFS. Carátulas/metadatos se guardan localmente en la configuración.
 
 ## Entrada y seguridad operativa
@@ -59,3 +59,12 @@ La tele Samsung192.168.1.48 quedó vinculada mediante Conexión rápida al usuar
 Copia cifrada actualizada incluyendo los ajustes corregidos: /var/backups/homelab-jellyfin/jellyfin-20261103T220346Z.tar.gz.gpg. SQLitequick_check y descifrado correctos. Copia sigue solo enpi5 y no tiene horario periódico.
 
 Acceso TV/tablet: https://jellyfin.bearsfamily.es , usuario bearsfamily. TV ya conectada. Claves de administración y familiar disponibles únicamente en el PC, archivo C:\Users\aalva\AppData\Local\Homelab\Jellyfin\acceso.txt, y archivo privado root del servidor. Nuevos contenidos de la carpeta de descargas se detectan en el escaneo horario o mediante escaneo manual de la biblioteca. Cuatro películas disponibles al cierre. Despliegue y conexión solicitados completados.
+
+
+## Escaneo manual en curso — 03/11/2026
+
+Ejecutado a petición del usuario después de mover películas. 131 películas ya indexadas y visibles. Último estado Running, progreso 57.6 %. El resultado Completed antiguo de la API corresponde al escaneo anterior, no a este. El trabajo actual sigue procesando metadatos e imágenes; no se cancela ni se vuelve a iniciar..
+
+Durante el primer intento se detectó OOMKilled con el límite inicial de1536Mi. La ampliación a2Gi por sí sola tampoco bastó. Se aplicó procesamiento secuencial (LibraryScanFanoutConcurrency=1, LibraryMetadataRefreshConcurrency=1, ParallelImageEncodingLimit=1), solicitud768Mi/límite2Gi y heap.NET768Mi (DOTNET_GCHeapHardLimit=0x30000000) con GCConserveMemory=9, dejando margen para memoria nativa/archivos. Cambios confirmados enGitOps y sincronizados. Última comprobación: podReady, cero reinicios desde el ajuste final y progreso creciente. No se han movido ni borrado películas al ejecutar el escaneo.
+
+Fuente del ajuste.NET: https://learn.microsoft.com/en-us/dotnet/core/runtime-config/garbage-collector .
