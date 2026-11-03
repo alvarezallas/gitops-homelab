@@ -96,3 +96,6 @@ En pi5, kubectl kustomize platform/monitoring y los demás paths deben renderiza
 Aceptación final: repo Connection Successful; raíz más seis hijas visibles; cada hija Synced/Healthy tras su adopción; cuatro nodos Ready, seis targets up, DNS, UIs y PV12/PVC Bound. No declarar GitOps operativo solo porque se haya creado el repositorio local.
 
 Referencias: [destino local y App of Apps](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/), [repositorios privados](https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/), [SSA, migración y protección de borrado](https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/).
+
+
+Jellyfin: https://jellyfin.bearsfamily.es · películasNAS solo lectura. Operación y conexiónTV en docs/jellyfin.md.
