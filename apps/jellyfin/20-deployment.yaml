@@ -59,7 +59,7 @@ spec:
           limits:
             cpu: '1'
             memory: 1536Mi
-            ephemeral-storage: 3Gi
+            ephemeral-storage: 10Gi
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
@@ -88,7 +88,8 @@ spec:
             path: /health
             port: http
           periodSeconds: 10
-          timeoutSeconds: 3
+          timeoutSeconds: 5
+          failureThreshold: 6
         livenessProbe:
           httpGet:
             path: /health
@@ -106,7 +107,7 @@ spec:
           readOnly: true
       - name: cache
         emptyDir:
-          sizeLimit: 2Gi
+          sizeLimit: 8Gi
       - name: tmp
         emptyDir:
           sizeLimit: 128Mi

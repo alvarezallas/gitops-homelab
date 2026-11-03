@@ -20,7 +20,7 @@ Si laTV antigua falla exclusivamente por confianzaTLS, alternativa solo en LAN: 
 - OrigenNAS:192.168.1.164:/mnt/d12tb/qbittorrent/downloads, mismo contenido que qBittorrent ve en /downloads. Jellyfin lo monta en /media/movies, NFS4.2 realmente ro, usuario10001sinroot. PV independiente jellyfin-media-pv y PVCmedia/jellyfin-media: no se ha reasignado nfs-pv-12/torrents-pvc.
 - Se añadió .ignore con incomplete/, *.!qB y *.part a la carpeta compartida para excluir temporales. No se han movido ni renombrado películas; qBittorrent conserva su funcionamiento/siembra.
 - Datos ySQLite: /var/lib/homelab-apps/jellyfin/config en pi5, PVjellyfin-config-pv/PVCjellyfin-config, Retain. Capacidad5Gi declarada, sin cuota física independiente. PostgreSQL compartido no interviene en esta aplicación.
-- Caché temporal2Gi en emptyDir. Solicitud250mCPU/512Mi; límites1CPU/1536Mi. Vídeo por reproducción directa o remux; transcodificación de vídeo deshabilitada para bearsfamily. Audio puede convertirse. Extracción de trickplay y capítulos desactivada para contener trabajo. Películas actualesH2641080p, audioAC3/EAC3 y subtítulosSubRip según indexación.
+- Caché temporal8Gi en emptyDir. Solicitud250mCPU/512Mi; límites1CPU/1536Mi. Vídeo por reproducción directa o remux; transcodificación de vídeo deshabilitada para bearsfamily. Audio puede convertirse. Extracción de trickplay y capítulos desactivada para contener trabajo. Películas actualesH2641080p, audioAC3/EAC3 y subtítulosSubRip según indexación.
 - Escaneo horario60min, primer escaneo completado. Monitor en tiempo real desactivado por NFS. Carátulas/metadatos se guardan localmente en la configuración.
 
 ## Entrada y seguridad operativa
@@ -45,3 +45,8 @@ sudo kubectl --kubeconfig=/etc/kubernetes/admin.conf -n argocd get application h
 Repositorioautoritativo: /home/alvarense/gitops-homelab/apps/jellyfin . Imagen fijada por digest, sin actualizaciones automáticas de imagen ni prune. Para cambios, commit enGit y sincronización manual enArgo. No ejecutar configure.py para cambiar una contraseña de usuario ya existente: usar administración deJellyfin. El asistente depende del archivo privado inicial y no lo publica.
 
 Fuentes: https://jellyfin.org/docs/general/installation/container/ , https://jellyfin.org/docs/general/post-install/networking/reverse-proxy/nginx/ , https://jellyfin.org/docs/general/server/media/excluding-directory/ .
+
+
+## Incidencia de reproducción y corrección — 03/11/2026
+
+El usuario confirmó imagen y audio correctos pero cortes. El evento deKubernetes mostró Evicted por superar2Gi deemptyDir/cache, seguido de reemplazo depod: causa concreta de interrupción. La configuración inicial de caché era insuficiente con el adelanto sin límite predeterminado. Corregido: EnableThrottling=true, ThrottleDelaySeconds120, EnableSegmentDeletion=true, SegmentKeepSeconds60; caché8Gi y límiteephemeral10Gi para margen (no reserva inmediata en disco). Readiness tolera transitorios hasta60segundos. Ajustes persistidos enconfiguración y asistente de reconstrucción. LaTV está por cable, pingmedido~0.26ms sin pérdidas; no hay evidencia de falloWiFi. Verificada sesiónTizen con direcciónreal .48. Última observación antesdelajuste: DirectPlay; en una sesiónanterior, remux con vídeo y audio directos por SecondaryAudioNotSupported. Confirmar reproducción sostenida despuésdeaplicar: no declarar resueltos los cortes solo por podReady.

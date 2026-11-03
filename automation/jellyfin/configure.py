@@ -23,6 +23,7 @@ if not info.get('StartupWizardCompleted',False):
 login=api('/Users/AuthenticateByName',{'Username':cfg['admin']['username'],'Pw':cfg['admin']['password']},'POST');token=login['AccessToken']
 server=api('/System/Configuration');server.update({'ServerName':'BearsFamily Cinema','UICulture':'es-ES','MetadataCountryCode':'ES','PreferredMetadataLanguage':'es','QuickConnectAvailable':True});api('/System/Configuration',server,'POST')
 net=api('/System/Configuration/network');net.update({'EnableUPnP':False,'AutoDiscovery':False,'KnownProxies':['127.0.0.1','192.168.1.163','10.244.0.1'],'LocalNetworkSubnets':['192.168.1.0/24','10.244.0.0/16','10.8.0.0/24'],'EnableRemoteAccess':False,'EnableHttps':False,'RequireHttps':False});api('/System/Configuration/network',net,'POST')
+encoding=api('/System/Configuration/encoding');encoding.update({'EnableThrottling':True,'ThrottleDelaySeconds':120,'EnableSegmentDeletion':True,'SegmentKeepSeconds':60});api('/System/Configuration/encoding',encoding,'POST')
 users=api('/Users');family=next((u for u in users if u['Name']==cfg['family']['username']),None)
 if not family:family=api('/Users/New',{'Name':cfg['family']['username'],'Password':cfg['family']['password']},'POST')
 policy=family['Policy'];policy.update({'IsAdministrator':False,'IsHidden':False,'EnableContentDeletion':False,'EnableVideoPlaybackTranscoding':False,'EnableAudioPlaybackTranscoding':True,'EnablePlaybackRemuxing':True,'EnableMediaConversion':False,'EnableSyncTranscoding':False,'EnableAllFolders':True,'EnableRemoteAccess':True,'EnablePublicSharing':False})
