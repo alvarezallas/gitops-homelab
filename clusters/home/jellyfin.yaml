@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homelab-jellyfin
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-wave: '60'
+spec:
+  project: homelab-platform
+  source:
+    repoURL: git@github.com:alvarezallas/gitops-homelab.git
+    targetRevision: main
+    path: apps/jellyfin
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+  syncPolicy:
+    syncOptions:
+    - ServerSideApply=true
+    - ClientSideApplyMigration=false
+    - FailOnSharedResource=true
+    - CreateNamespace=true
+  revisionHistoryLimit: 10

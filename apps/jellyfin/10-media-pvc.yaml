@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jellyfin-media
+  namespace: media
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  accessModes:
+  - ReadOnlyMany
+  storageClassName: ''
+  volumeName: jellyfin-media-pv
+  resources:
+    requests:
+      storage: 12Ti

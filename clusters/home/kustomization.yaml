@@ -15,3 +15,4 @@ resources:
 - onthemanga.yaml
 - wireguard.yaml
 - certificates.yaml
+- jellyfin.yaml

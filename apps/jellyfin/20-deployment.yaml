@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin
+  namespace: media
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      labels:
+        app: jellyfin
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: pi5
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: jellyfin
+        image: docker.io/jellyfin/jellyfin:latest@sha256:fea863d0cd9ec445985d9c75fc6ed64e38a1d2766cf0c250a33d553f4fc1b771
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8096
+        env:
+        - name: TZ
+          value: Europe/Madrid
+        - name: JELLYFIN_PublishedServerUrl
+          value: https://jellyfin.bearsfamily.es
+        - name: JELLYFIN_DATA_DIR
+          value: /config/data
+        - name: JELLYFIN_CONFIG_DIR
+          value: /config/config
+        - name: JELLYFIN_LOG_DIR
+          value: /config/log
+        - name: JELLYFIN_CACHE_DIR
+          value: /cache
+        - name: HOME
+          value: /config
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+            ephemeral-storage: 256Mi
+          limits:
+            cpu: '1'
+            memory: 1536Mi
+            ephemeral-storage: 3Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: media
+          mountPath: /media/movies
+          readOnly: true
+        - name: cache
+          mountPath: /cache
+        - name: tmp
+          mountPath: /tmp
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 5
+          failureThreshold: 60
+          timeoutSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 5
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: jellyfin-config
+      - name: media
+        persistentVolumeClaim:
+          claimName: jellyfin-media
+          readOnly: true
+      - name: cache
+        emptyDir:
+          sizeLimit: 2Gi
+      - name: tmp
+        emptyDir:
+          sizeLimit: 128Mi
