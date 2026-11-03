@@ -51,6 +51,10 @@ spec:
           value: /cache
         - name: HOME
           value: /config
+        - name: DOTNET_GCHeapHardLimit
+          value: '0x30000000'
+        - name: DOTNET_GCConserveMemory
+          value: '9'
         resources:
           requests:
             cpu: 250m
