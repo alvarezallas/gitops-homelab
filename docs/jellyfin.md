@@ -68,3 +68,12 @@ Ejecutado a petición del usuario después de mover películas. 131 películas y
 Durante el primer intento se detectó OOMKilled con el límite inicial de1536Mi. La ampliación a2Gi por sí sola tampoco bastó. Se aplicó procesamiento secuencial (LibraryScanFanoutConcurrency=1, LibraryMetadataRefreshConcurrency=1, ParallelImageEncodingLimit=1), solicitud768Mi/límite2Gi y heap.NET768Mi (DOTNET_GCHeapHardLimit=0x30000000) con GCConserveMemory=9, dejando margen para memoria nativa/archivos. Cambios confirmados enGitOps y sincronizados. Última comprobación: podReady, cero reinicios desde el ajuste final y progreso creciente. No se han movido ni borrado películas al ejecutar el escaneo.
 
 Fuente del ajuste.NET: https://learn.microsoft.com/en-us/dotnet/core/runtime-config/garbage-collector .
+
+
+## Escaneo manual completado — 03/11/2026
+
+Ejecutado a petición del usuario después de mover películas. 131 películas ya indexadas y visibles. Resultado Completed. Inicio UTC: 2026-11-03T22:26:50.1977786Z; fin UTC: 2026-11-03T22:43:14.3784645Z.
+
+Durante el primer intento se detectó OOMKilled con el límite inicial de1536Mi. La ampliación a2Gi por sí sola tampoco bastó. Se aplicó procesamiento secuencial (LibraryScanFanoutConcurrency=1, LibraryMetadataRefreshConcurrency=1, ParallelImageEncodingLimit=1), solicitud768Mi/límite2Gi y heap.NET768Mi (DOTNET_GCHeapHardLimit=0x30000000) con GCConserveMemory=9, dejando margen para memoria nativa/archivos. Cambios confirmados enGitOps y sincronizados. Última comprobación: podReady, cero reinicios desde el ajuste final y progreso creciente. No se han movido ni borrado películas al ejecutar el escaneo.
+
+Fuente del ajuste.NET: https://learn.microsoft.com/en-us/dotnet/core/runtime-config/garbage-collector .
