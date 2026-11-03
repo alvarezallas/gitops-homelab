@@ -33,7 +33,7 @@ Credenciales inicialesroot: /root/.config/homelab-jellyfin/initial-access.json,0
 sudo python3 /home/alvarense/gitops-homelab/automation/jellyfin/backup.py
 ```
 
-Comprobacionesrealizadas: recreación del pod conservó cuentas/configuración; dosPVCBound;4películas; lectura autenticada de1024bytes respondió206; login familiar porHTTPS desdeWindows y WebSocket101 correctos; montajeNFSro yUID10001 comprobados. Reproducción audiovisual completa enTV pendiente de confirmación del usuario en el momento de este documento.
+Comprobacionesrealizadas: recreación del pod conservó cuentas/configuración; dosPVCBound;4películas; lectura autenticada de1024bytes respondió206; login familiar porHTTPS desdeWindows y WebSocket101 correctos; montajeNFSro yUID10001 comprobados. Reproducción audiovisual en la TV confirmada por el usuario; ver resultado final y corrección de caché al final de este documento.
 
 ## Operaciones
 
@@ -50,3 +50,12 @@ Fuentes: https://jellyfin.org/docs/general/installation/container/ , https://jel
 ## Incidencia de reproducción y corrección — 03/11/2026
 
 El usuario confirmó imagen y audio correctos pero cortes. El evento deKubernetes mostró Evicted por superar2Gi deemptyDir/cache, seguido de reemplazo depod: causa concreta de interrupción. La configuración inicial de caché era insuficiente con el adelanto sin límite predeterminado. Corregido: EnableThrottling=true, ThrottleDelaySeconds120, EnableSegmentDeletion=true, SegmentKeepSeconds60; caché8Gi y límiteephemeral10Gi para margen (no reserva inmediata en disco). Readiness tolera transitorios hasta60segundos. Ajustes persistidos enconfiguración y asistente de reconstrucción. LaTV está por cable, pingmedido~0.26ms sin pérdidas; no hay evidencia de falloWiFi. Verificada sesiónTizen con direcciónreal .48. Última observación antesdelajuste: DirectPlay; en una sesiónanterior, remux con vídeo y audio directos por SecondaryAudioNotSupported. Confirmar reproducción sostenida despuésdeaplicar: no declarar resueltos los cortes solo por podReady.
+
+
+## Resultado final confirmado — 03/11/2026
+
+La tele Samsung192.168.1.48 quedó vinculada mediante Conexión rápida al usuario bearsfamily. El usuario confirma que ahora reproduce sin cortes después del ajuste de caché. Observación adicional de40segundos: mismo pod sin reinicios, posición avanzó de380,6 a422,6segundos, caché975→1116MiB y se mantuvo en1116MiB en las últimas muestras. Vídeo y audio originales (IsVideoDirect/IsAudioDirect=true), con cambio de contenedor/remux identificado por SecondaryAudioNotSupported. No se está recodificando el vídeo.
+
+Copia cifrada actualizada incluyendo los ajustes corregidos: /var/backups/homelab-jellyfin/jellyfin-20261103T220346Z.tar.gz.gpg. SQLitequick_check y descifrado correctos. Copia sigue solo enpi5 y no tiene horario periódico.
+
+Acceso TV/tablet: https://jellyfin.bearsfamily.es , usuario bearsfamily. TV ya conectada. Claves de administración y familiar disponibles únicamente en el PC, archivo C:\Users\aalva\AppData\Local\Homelab\Jellyfin\acceso.txt, y archivo privado root del servidor. Nuevos contenidos de la carpeta de descargas se detectan en el escaneo horario o mediante escaneo manual de la biblioteca. Cuatro películas disponibles al cierre. Despliegue y conexión solicitados completados.
