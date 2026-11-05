@@ -109,6 +109,10 @@ spec:
           value: '1'
         - name: SUMMARY_QUEUE_WORKERS
           value: '1'
+        - name: EMBEDDING_BASE_URL
+          value: https://notas.bearsfamily.es/_pc-ai/v1
+        - name: EMBEDDING_MODEL
+          value: embeddinggemma:300m
         envFrom:
         - secretRef:
             name: speakr-config
