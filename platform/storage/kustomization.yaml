@@ -13,3 +13,4 @@ resources:
 - 09-certificates-acme-pv.yaml
 - 10-jellyfin-config-pv.yaml
 - 11-jellyfin-media-pv.yaml
+- 12-speakr-data-pv.yaml

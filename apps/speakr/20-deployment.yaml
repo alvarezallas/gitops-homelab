@@ -1,0 +1,160 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: speakr
+  namespace: speakr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: speakr
+  template:
+    metadata:
+      labels:
+        app: speakr
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: pi5
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: speakr
+        image: learnedmachine/speakr:0.10.19-alpha-lite@sha256:80bc63c5f704047ec5a9406ff3ad1915b0bd22aeb6c6e60801ddec53e87099be
+        imagePullPolicy: IfNotPresent
+        command:
+        - gunicorn
+        args:
+        - --workers
+        - '1'
+        - --worker-class
+        - gthread
+        - --threads
+        - '4'
+        - --bind
+        - 0.0.0.0:8899
+        - --timeout
+        - '1800'
+        - --no-control-socket
+        - src.app:app
+        env:
+        - name: TZ
+          value: Europe/Madrid
+        - name: TRANSCRIPTION_CONNECTOR
+          value: openai_whisper
+        - name: TRANSCRIPTION_BASE_URL
+          value: https://notas.bearsfamily.es/_pc-ai/v1
+        - name: TRANSCRIPTION_MODEL
+          value: whisper-1
+        - name: TEXT_MODEL_BASE_URL
+          value: https://notas.bearsfamily.es/_pc-ai/v1
+        - name: TEXT_MODEL_NAME
+          value: qwen3.5:4b
+        - name: TEXT_MODEL_EXTRA_BODY
+          value: '{"think":false}'
+        - name: ALLOW_REGISTRATION
+          value: 'false'
+        - name: SESSION_COOKIE_SECURE
+          value: 'true'
+        - name: TRUSTED_PROXY_HOPS
+          value: '1'
+        - name: TRUSTED_PROXIES
+          value: 10.244.0.0/24,192.168.1.163,127.0.0.1
+        - name: UPLOAD_FOLDER
+          value: /data/uploads
+        - name: ENABLE_INQUIRE_MODE
+          value: 'true'
+        - name: ENABLE_INQUIRE_AGENT
+          value: 'false'
+        - name: SUMMARY_MAX_TOKENS
+          value: '4096'
+        - name: CHAT_MAX_TOKENS
+          value: '2048'
+        - name: TITLE_MAX_TOKENS
+          value: '256'
+        - name: EVENT_MAX_TOKENS
+          value: '1024'
+        - name: MAX_CONCURRENT_UPLOADS
+          value: '1'
+        - name: AUDIO_COMPRESS_UPLOADS
+          value: 'true'
+        - name: HF_HUB_OFFLINE
+          value: '1'
+        - name: HF_HUB_DISABLE_TELEMETRY
+          value: '1'
+        - name: TOKENIZERS_PARALLELISM
+          value: 'false'
+        - name: OMP_NUM_THREADS
+          value: '1'
+        - name: OPENBLAS_NUM_THREADS
+          value: '1'
+        - name: HOME
+          value: /data/instance
+        - name: XDG_CACHE_HOME
+          value: /data/instance/cache
+        envFrom:
+        - secretRef:
+            name: speakr-config
+        ports:
+        - name: http
+          containerPort: 8899
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: postgresql-ca
+          mountPath: /etc/postgresql-ca
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: '1'
+            memory: 1536Mi
+            ephemeral-storage: 2Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          httpGet:
+            path: /login
+            port: http
+          periodSeconds: 10
+          failureThreshold: 60
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /login
+            port: http
+          periodSeconds: 15
+          timeoutSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: http
+          periodSeconds: 30
+          failureThreshold: 5
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: speakr-data
+      - name: postgresql-ca
+        configMap:
+          name: postgresql-ca
+      - name: tmp
+        emptyDir:
+          sizeLimit: 1Gi
