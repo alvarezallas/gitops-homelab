@@ -103,6 +103,12 @@ spec:
           value: /data/instance
         - name: XDG_CACHE_HOME
           value: /data/instance/cache
+        - name: ENABLE_PUBLIC_SHARING
+          value: 'false'
+        - name: JOB_QUEUE_WORKERS
+          value: '1'
+        - name: SUMMARY_QUEUE_WORKERS
+          value: '1'
         envFrom:
         - secretRef:
             name: speakr-config
