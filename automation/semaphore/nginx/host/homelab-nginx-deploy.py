@@ -181,6 +181,8 @@ def probes(sha):
         hosts += [('jellyfin.'+domain, (200,302))]
     if modern and (RELEASES / sha / 'speakr.conf').exists():
         hosts += [('notas.'+domain, (200,302))]
+    if modern and (RELEASES / sha / 'adguard.conf').exists():
+        hosts += [('adguard.'+domain, (200,302))]
     results = {}
     for host, allowed in hosts:
         code = run(['/usr/bin/curl', '--silent', '--show-error', '--max-time', '10',
