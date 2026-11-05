@@ -17,3 +17,4 @@ resources:
 - certificates.yaml
 - jellyfin.yaml
 - speakr.yaml
+- adguard.yaml

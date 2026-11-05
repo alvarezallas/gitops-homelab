@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: adguard-work-pv
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: ''
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    namespace: dns-filter
+    name: adguard-work
+  local:
+    path: /var/lib/homelab-apps/adguard-home/work
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - pi5

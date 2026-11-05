@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adguard-home
+  namespace: dns-filter
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: adguard-home
+  template:
+    metadata:
+      labels:
+        app: adguard-home
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: pi5
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+        - 1.1.1.1
+        - 9.9.9.9
+        options:
+        - name: ndots
+          value: '1'
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: adguard-home
+        image: adguard/adguardhome:v0.107.80@sha256:198924ddb1cd509677e8101b138f58d985a6f0da6502a2fd0a1910e4b0f942b8
+        args:
+        - --no-check-update
+        - -c
+        - /opt/adguardhome/conf/AdGuardHome.yaml
+        - -w
+        - /opt/adguardhome/work
+        env:
+        - name: TZ
+          value: Europe/Madrid
+        - name: GOMEMLIMIT
+          value: 400MiB
+        - name: GOMAXPROCS
+          value: '2'
+        ports:
+        - name: web
+          containerPort: 3000
+        - name: dns-tcp
+          containerPort: 5353
+          protocol: TCP
+        - name: dns-udp
+          containerPort: 5353
+          protocol: UDP
+        volumeMounts:
+        - name: conf
+          mountPath: /opt/adguardhome/conf
+        - name: work
+          mountPath: /opt/adguardhome/work
+        - name: tmp
+          mountPath: /tmp
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+            ephemeral-storage: 64Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+            ephemeral-storage: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          tcpSocket:
+            port: web
+          periodSeconds: 5
+          failureThreshold: 60
+        readinessProbe:
+          tcpSocket:
+            port: dns-tcp
+          periodSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          tcpSocket:
+            port: web
+          periodSeconds: 20
+          failureThreshold: 5
+      volumes:
+      - name: conf
+        persistentVolumeClaim:
+          claimName: adguard-conf
+      - name: work
+        persistentVolumeClaim:
+          claimName: adguard-work
+      - name: tmp
+        emptyDir:
+          sizeLimit: 64Mi
