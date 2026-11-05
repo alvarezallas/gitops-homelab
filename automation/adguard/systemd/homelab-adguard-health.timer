@@ -1,0 +1,8 @@
+[Unit]
+Description=Comprobar AdGuard Home cada cinco minutos
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=5min
+Unit=homelab-adguard-health.service
+[Install]
+WantedBy=timers.target

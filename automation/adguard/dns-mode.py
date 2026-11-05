@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Fixed-target, reversible dnsmasq upstream switch for the installed filter."""
-import pathlib,subprocess,os,json,urllib.request,base64,argparse,tempfile
+import pathlib,subprocess,os,json,urllib.request,base64,argparse,tempfile,time
 ROOT=pathlib.Path('/var/lib/homelab-apps/adguard-home');P=pathlib.Path('/etc/dnsmasq.d/homelab.conf');BACK=ROOT/'private/dnsmasq-before-cutover.conf'
 def run(a):return subprocess.check_output(a,text=True,stderr=subprocess.STDOUT,timeout=15)
 def answers(host,qtype='A',port=53):
@@ -17,8 +17,14 @@ def apply(mode):
  old='server=80.58.61.250';new='server=192.168.1.163#30553'
  if mode=='enable':
   d=json.loads((ROOT/'private/credentials.json').read_text());h={'Authorization':'Basic '+base64.b64encode((d['username']+':'+d['password']).encode()).decode()}
-  with urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:30094/control/status',headers=h),timeout=10) as f:assert json.load(f)['protection_enabled']
-  assert '0.0.0.0' in answers('pagead2.googlesyndication.com',port=30553)
+  ready=False
+  for _ in range(30):
+   try:
+    with urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:30094/control/status',headers=h),timeout=3) as f:protected=json.load(f)['protection_enabled']
+    if protected and '0.0.0.0' in answers('pagead2.googlesyndication.com',port=30553):ready=True;break
+   except Exception:pass
+   time.sleep(1)
+  assert ready,'AdGuard protection not ready; DNS stays in bypass'
   if new in text.splitlines():return {'mode':'enabled','changed':False}
   assert text.splitlines().count(old)==1
   # Reject other global upstreams in the active included .conf files.

@@ -1,0 +1,10 @@
+[Unit]
+Description=Copia cifrada de AdGuard Home al NAS
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/backup-adguard
+NoNewPrivileges=yes
+TimeoutStartSec=12min
+UMask=0077

@@ -1,0 +1,11 @@
+[Unit]
+Description=Verificacion funcional del DNS filtrado
+After=network-online.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/health-adguard
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+UMask=0077
+TimeoutStartSec=40

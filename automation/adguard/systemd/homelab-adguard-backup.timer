@@ -1,0 +1,9 @@
+[Unit]
+Description=Copia diaria de AdGuard Home
+[Timer]
+OnCalendar=*-*-* 03:35:00 Europe/Madrid
+RandomizedDelaySec=5min
+Persistent=true
+Unit=homelab-adguard-backup.service
+[Install]
+WantedBy=timers.target
