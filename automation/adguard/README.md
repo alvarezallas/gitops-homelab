@@ -62,6 +62,7 @@ La observación durante 24–48 h queda en curso. No se ha hecho una prueba nuev
 
 - Copia diaria entre **03:35 y03:40, Europe/Madrid**. Retención en NAS: últimas 7 fechas diarias y 4 semanas; en el primer día todavía no existe ese histórico.
 - AES-256-GCM con comprobación de integridad y SHA256 del archivo transferido.
+- Las copias de `work` incluyen registros: aunque la interfaz conserve 24 horas, los archivos cifrados pueden retenerlos durante las cuatro semanas de copias.
 - Destino: NAS`.164`, `/mnt/d01tb/adguard-backups`. Contiene únicamente copias cifradas.
 - Clave: pi5`/var/lib/homelab-apps/adguard-home/private/backup-key.bin`; copia privada en el PC bajo `adguard-home\secrets\backup-key.bin`. Conservarla: sin ella no se podrán descifrar las copias.
 - Durante una copia consistente, el DNS pasa brevemente a bypass, AdGuard se detiene y se reinicia, y después se reactiva el filtro. La resolución privada sigue en dnsmasq y la externa usa temporalmente el upstream anterior.
