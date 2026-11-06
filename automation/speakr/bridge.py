@@ -16,7 +16,12 @@ log=logging.getLogger('speakr')
 @app.middleware('http')
 async def auth(req,call_next):
  import secrets
- if not secrets.compare_digest(req.headers.get('authorization',''),'Bearer '+CFG['api_key']):return JSONResponse({'error':'unauthorized'},status_code=401)
+ provided=req.headers.get('authorization','')
+ legacy=secrets.compare_digest(provided,'Bearer '+CFG['api_key'])
+ n8n=bool(CFG.get('n8n_api_key')) and secrets.compare_digest(provided,'Bearer '+CFG['n8n_api_key'])
+ if not (legacy or n8n):return JSONResponse({'error':'unauthorized'},status_code=401)
+ if n8n and req.url.path not in ['/health','/v1/models','/v1/chat/completions']:return JSONResponse({'error':'forbidden'},status_code=403)
+ req.state.client_role='n8n' if n8n else 'speakr'
  return await call_next(req)
 @contextlib.contextmanager
 def gpu_slot():
@@ -46,7 +51,7 @@ def unload_ollama():
 @app.get('/health')
 def health():return {'status':'ok','asr':'medium','device':'cuda','diarization':False}
 @app.get('/v1/models')
-def models():return {'object':'list','data':[{'id':m,'object':'model','owned_by':'homelab'} for m in ['whisper-1','qwen3.5:4b']]}
+def models(req:Request):return {'object':'list','data':[{'id':m,'object':'model','owned_by':'homelab'} for m in (['qwen3.5:4b'] if req.state.client_role=='n8n' else ['whisper-1','qwen3.5:4b'])]}
 @app.post('/v1/embeddings')
 async def embeddings(req:Request):
  body=await req.json()
@@ -87,6 +92,10 @@ def transcribe(file:UploadFile=File(...),model:str=Form('whisper-1'),language:st
 async def chat(req:Request):
  body=await req.json()
  if body.get('model')!='qwen3.5:4b':raise HTTPException(400,'Model not configured')
+ if req.state.client_role=='n8n':
+  body['max_tokens']=min(int(body.pop('max_completion_tokens',body.get('max_tokens',2048))),2048)
+  body['think']=False
+  body['temperature']=0.1
  # Execute synchronous work in a worker thread; streaming iterator holds the GPU slot.
  from starlette.concurrency import run_in_threadpool
  if body.get('stream'):

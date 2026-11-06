@@ -1,0 +1,10 @@
+[Unit]
+Description=Copia cifrada n8n y estado de agentes al NAS
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/backup-n8n
+UMask=0077
+NoNewPrivileges=yes
+TimeoutStartSec=12min
