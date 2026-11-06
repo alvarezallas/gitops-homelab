@@ -19,3 +19,4 @@ resources:
 - speakr.yaml
 - adguard.yaml
 - n8n.yaml
+- whatsapp-web.yaml

@@ -1,0 +1,319 @@
+{
+  "name": "WhatsApp Web - cola privada",
+  "nodes": [
+    {
+      "id": "4d82790b-f8e3-4431-9097-a593d8230e59",
+      "name": "Entrada enqueue",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-outbox/enqueue",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURAR_EN_N8N",
+          "name": "WhatsApp - worker privado"
+        }
+      },
+      "webhookId": "eca3233e-6db7-4c33-8087-6226a8477209"
+    },
+    {
+      "id": "141e40a8-b050-4f10-a99c-287a335ad59a",
+      "name": "SQL enqueue",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.8,
+      "position": [
+        250,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH inserted AS (INSERT INTO whatsapp_delivery.outbox(id,body,body_hash) VALUES($1,$2,encode(sha256(convert_to($2,'UTF8')),'hex')) ON CONFLICT(id) DO NOTHING RETURNING id) SELECT id,state,body_hash=encode(sha256(convert_to($2,'UTF8')),'hex') AS content_matches FROM whatsapp_delivery.outbox WHERE id=$1 UNION ALL SELECT id,'pending',true FROM inserted;",
+        "options": {
+          "queryReplacement": "={{ [$json.body.id, $json.body.text] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "CONFIGURAR_EN_N8N",
+          "name": "WhatsApp - solo cola TLS"
+        }
+      }
+    },
+    {
+      "id": "ea78d045-206f-46e3-b39d-d5ea4941085e",
+      "name": "Respuesta enqueue",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        500,
+        0
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "915a9db9-3a23-416b-8e77-98415cb5abd1",
+      "name": "Entrada claim",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        220
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-outbox/claim",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURAR_EN_N8N",
+          "name": "WhatsApp - worker privado"
+        }
+      },
+      "webhookId": "9300d17d-7311-4ca0-99ab-94e75fd3234e"
+    },
+    {
+      "id": "8cfc375e-ea89-4863-a69b-775a3714c108",
+      "name": "SQL claim",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.8,
+      "position": [
+        250,
+        220
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH clean AS (UPDATE whatsapp_delivery.outbox SET state='uncertain' WHERE state='claimed' AND claimed_at<now()-interval '15 minutes'), candidate AS (SELECT id FROM whatsapp_delivery.outbox WHERE state='pending' AND expires_at>now() AND NOT EXISTS(SELECT 1 FROM whatsapp_delivery.outbox WHERE state IN ('uncertain','claimed')) ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1), claimed AS (UPDATE whatsapp_delivery.outbox o SET state='claimed',lease=$1,claimed_at=now() FROM candidate c WHERE o.id=c.id RETURNING o.id,o.body,o.lease) SELECT COALESCE((SELECT row_to_json(claimed) FROM claimed),'{}'::json) AS job;",
+        "options": {
+          "queryReplacement": "={{ [$json.body.lease] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "CONFIGURAR_EN_N8N",
+          "name": "WhatsApp - solo cola TLS"
+        }
+      }
+    },
+    {
+      "id": "cf079077-f4cb-4f6c-8389-b53f8eed95cd",
+      "name": "Respuesta claim",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        500,
+        220
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "a8c556da-2863-44c2-bcaf-dbffedccf483",
+      "name": "Entrada receipt",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        440
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-outbox/receipt",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURAR_EN_N8N",
+          "name": "WhatsApp - worker privado"
+        }
+      },
+      "webhookId": "86e363f8-50c2-4574-bdbb-0da06c30ecb1"
+    },
+    {
+      "id": "5fb0f542-f67c-4f54-a061-3f7abf36b301",
+      "name": "SQL receipt",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.8,
+      "position": [
+        250,
+        440
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH updated AS (UPDATE whatsapp_delivery.outbox SET state=$3,finished_at=CASE WHEN $3='sent' THEN now() ELSE NULL END WHERE id=$1 AND lease=$2 AND state='claimed' AND $3 IN ('sent','uncertain') RETURNING id,state) SELECT COALESCE((SELECT row_to_json(updated) FROM updated),'{}'::json) AS receipt;",
+        "options": {
+          "queryReplacement": "={{ [$json.body.id, $json.body.lease, $json.body.state] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "CONFIGURAR_EN_N8N",
+          "name": "WhatsApp - solo cola TLS"
+        }
+      }
+    },
+    {
+      "id": "5ddca364-ab4b-4c5b-997e-fdbca87ff151",
+      "name": "Respuesta receipt",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        500,
+        440
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "5e2e759c-8e6a-47cc-adad-2094364e5d31",
+      "name": "Retencion diaria",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        700
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 3 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "64310040-43c6-4548-b4c3-9acd87698f54",
+      "name": "Limpiar solo cola",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.8,
+      "position": [
+        250,
+        700
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE whatsapp_delivery.outbox SET state='expired',body=NULL WHERE state='pending' AND expires_at<now(); UPDATE whatsapp_delivery.outbox SET body=NULL WHERE state IN ('sent','expired') AND coalesce(finished_at,created_at)<now()-interval '7 days'; DELETE FROM whatsapp_delivery.outbox WHERE state IN ('sent','expired') AND coalesce(finished_at,created_at)<now()-interval '30 days';",
+        "options": {}
+      },
+      "credentials": {
+        "postgres": {
+          "id": "CONFIGURAR_EN_N8N",
+          "name": "WhatsApp - solo cola TLS"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Entrada enqueue": {
+      "main": [
+        [
+          {
+            "node": "SQL enqueue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SQL enqueue": {
+      "main": [
+        [
+          {
+            "node": "Respuesta enqueue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entrada claim": {
+      "main": [
+        [
+          {
+            "node": "SQL claim",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SQL claim": {
+      "main": [
+        [
+          {
+            "node": "Respuesta claim",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entrada receipt": {
+      "main": [
+        [
+          {
+            "node": "SQL receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SQL receipt": {
+      "main": [
+        [
+          {
+            "node": "Respuesta receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retencion diaria": {
+      "main": [
+        [
+          {
+            "node": "Limpiar solo cola",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "Europe/Madrid",
+    "executionOrder": "v1",
+    "executionTimeout": 45,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  }
+}

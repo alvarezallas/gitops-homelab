@@ -1,0 +1,151 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whatsapp-web
+  namespace: whatsapp
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: whatsapp-web
+  template:
+    metadata:
+      labels:
+        app: whatsapp-web
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: pi5
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 45
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        seccompProfile:
+          type: Localhost
+          localhostProfile: whatsapp-playwright.json
+      initContainers:
+      - name: dependencies
+        image: mcr.microsoft.com/playwright:v1.65.0-noble@sha256:ccf917390e8eea6cad2bb493313b9d8db2856ed41c24db0a6727eacc766fd273
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - cp /app/package*.json /deps/ && cd /deps && npm ci --ignore-scripts --no-audit
+          --no-fund --cache=/tmp/npm-cache
+        volumeMounts:
+        - name: code
+          mountPath: /app
+          readOnly: true
+        - name: deps
+          mountPath: /deps
+        - name: tmp
+          mountPath: /tmp
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+          seccompProfile:
+            type: RuntimeDefault
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: '1'
+            memory: 384Mi
+      containers:
+      - name: worker
+        image: mcr.microsoft.com/playwright:v1.65.0-noble@sha256:ccf917390e8eea6cad2bb493313b9d8db2856ed41c24db0a6727eacc766fd273
+        command:
+        - xvfb-run
+        - -a
+        - node
+        - /app/worker.cjs
+        env:
+        - name: NODE_PATH
+          value: /deps/node_modules
+        - name: NODE_OPTIONS
+          value: --max-old-space-size=128
+        - name: CONFIG_FILE
+          value: /run/private/config.json
+        - name: DATA_DIR
+          value: /data
+        - name: PW_HEADED
+          value: '1'
+        - name: PORT
+          value: '8080'
+        - name: LISTEN_HOST
+          value: 0.0.0.0
+        ports:
+        - name: http
+          containerPort: 8080
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: code
+          mountPath: /app
+          readOnly: true
+        - name: deps
+          mountPath: /deps
+          readOnly: true
+        - name: config
+          mountPath: /run/private
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+        - name: shm
+          mountPath: /dev/shm
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            cpu: '1'
+            memory: 1Gi
+            ephemeral-storage: 2Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          tcpSocket:
+            port: http
+          periodSeconds: 10
+          failureThreshold: 60
+        readinessProbe:
+          tcpSocket:
+            port: http
+          periodSeconds: 10
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: whatsapp-web-data
+      - name: code
+        configMap:
+          name: whatsapp-web-code
+      - name: deps
+        emptyDir: {}
+      - name: config
+        secret:
+          secretName: whatsapp-web-config
+          defaultMode: 288
+      - name: tmp
+        emptyDir:
+          sizeLimit: 512Mi
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 256Mi

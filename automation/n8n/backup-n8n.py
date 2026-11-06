@@ -34,6 +34,7 @@ def restore_test(plain):
     q='SELECT count(*) FROM workflow_entity;' if source=='n8n' else 'SELECT count(*) FROM agent_reports;'
     counts[source]=int(pg(['psql','-X','-At','-U','postgres','-d',db,'-c',q]).strip())
     if source=='n8n':
+     expected_credentials=int(pg(['psql','-X','-At','-U','postgres','-d',db,'-c','SELECT count(*) FROM credentials_entity;']).strip())
      # Isolated CLI Pod: no web server, no scheduler, no Service, no tool executions.
      name='n8n-restorecheck-'+os.urandom(4).hex()
      original=json.loads(run(K+['-n','n8n','get','deploy','n8n','-o','json']))['spec']['template']['spec']
@@ -50,8 +51,8 @@ def restore_test(plain):
      run(K+['apply','-f','-'],json.dumps(pod).encode())
      try:
       run(K+['-n','n8n','wait','--for=jsonpath={.status.phase}=Succeeded','pod/'+name,'--timeout=180s'],timeout=200)
-      log=run(K+['-n','n8n','logs',name]).decode();assert 'DECRYPTED_CREDENTIALS_OK:2' in log
-      counts['decrypted_credentials']=2
+      log=run(K+['-n','n8n','logs',name]).decode();assert 'DECRYPTED_CREDENTIALS_OK:'+str(expected_credentials) in log
+      counts['decrypted_credentials']=expected_credentials
      finally:run(K+['-n','n8n','delete','pod',name,'--wait=true','--timeout=40s'])
    finally:pg(['dropdb','-U','postgres',db])
   assert counts['n8n']>=1 and counts['automation_state']>=1
