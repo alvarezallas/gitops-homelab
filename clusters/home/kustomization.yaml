@@ -18,3 +18,4 @@ resources:
 - jellyfin.yaml
 - speakr.yaml
 - adguard.yaml
+- n8n.yaml

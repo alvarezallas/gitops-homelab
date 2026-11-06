@@ -14,3 +14,4 @@ resources:
 - 10-jellyfin-config-pv.yaml
 - 11-jellyfin-media-pv.yaml
 - 12-speakr-data-pv.yaml
+- 13-n8n-data-pv.yaml
