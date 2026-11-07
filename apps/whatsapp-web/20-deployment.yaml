@@ -15,7 +15,7 @@ spec:
       labels:
         app: whatsapp-web
       annotations:
-        bearsfamily.es/code-sha256: 0a484f8bf53ef532ca5c682e33f430fd8c5fb04518d72e63e99b576b0716b5dd
+        bearsfamily.es/code-sha256: f03adb678ce728284e92bb27d1ba7152671849ff9d183565167e7cd32ab20823
     spec:
       nodeSelector:
         kubernetes.io/hostname: pi5

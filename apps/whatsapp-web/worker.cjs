@@ -24,7 +24,7 @@ function marker(id){return 'BF-DIGEST:'+crypto.createHash('sha256').update(id).d
 async function confirmed(id){const bubble=page.locator('#main .message-out').filter({hasText:marker(id)});if(!await bubble.count())return false;return await bubble.locator('[data-icon="msg-check"], [data-icon="msg-dblcheck"], [data-icon="msg-dblcheck-ack"]').first().isVisible().catch(()=>false);}
 async function receipt(job,state){const r=await queue('receipt',{id:job.id,lease:job.lease,state});if(r.receipt?.id!==job.id)throw new Error('receipt_not_confirmed');fs.unlinkSync(CP);}
 async function tick(){
- if(busy||stopping||!ready)return;busy=true;
+ if(busy||stopping||!ready||fs.existsSync(path.join(PRIVATE,'delivery.paused')))return;busy=true;
  try{
   if(!await linked())return;
   await self();
@@ -77,7 +77,8 @@ const server=http.createServer(async(req,res)=>{
    const selected=await page.locator('button,[role="button"]').evaluateAll(es=>es.map(e=>({name:e.getAttribute('aria-label')||e.getAttribute('title')||'',visible:!!e.getClientRects().length})).filter(x=>/^(Nuevo chat|New chat)(\b|$)/i.test(x.name)));
    const selfTexts=await page.getByText(/(?:mismo número|mensajes a ti mismo|message yourself)/i).evaluateAll(es=>es.filter(e=>e.getClientRects().length).map(e=>({tag:e.tagName,text:e.textContent.trim().slice(0,140)})));
    const remember=await page.getByRole('checkbox').evaluateAll(es=>es.map(e=>({checked:e.checked??e.getAttribute('aria-checked'),label:e.getAttribute('aria-label')||e.closest('label')?.textContent?.trim()||''})));
-   return json(res,200,{url:new URL(page.url()).origin,pane_side:await page.locator('#pane-side').count(),side:await page.locator('#side').count(),main:await page.locator('#main').count(),qr:await page.locator('[data-ref] canvas').count(),new_chat_buttons:selected,self_entries:selfTexts,dialogs:await page.getByRole('dialog').count(),remember_session:remember});
+   const storage=await page.evaluate(async()=>({databases:(await indexedDB.databases()).map(d=>({name:d.name,version:d.version})),localStorageItems:localStorage.length}));
+   return json(res,200,{url:new URL(page.url()).origin,pane_side:await page.locator('#pane-side').count(),side:await page.locator('#side').count(),main:await page.locator('#main').count(),qr:await page.locator('[data-ref] canvas').count(),new_chat_buttons:selected,self_entries:selfTexts,dialogs:await page.getByRole('dialog').count(),remember_session:remember,storage});
   }
   if(u.pathname==='/qr'){
    if(!ready||await linked())return json(res,404,{error:'qr_not_available'});
