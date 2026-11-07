@@ -74,3 +74,15 @@ sudo kubectl --kubeconfig=/etc/kubernetes/admin.conf -n whatsapp scale deploymen
 La sincronización de Argo es manual. Para una parada permanente, cambiar las réplicas en Git y no reactivar el worker de Windows a la vez. El contenedor no obtiene acceso SSH ni kubeconfig de administrador.
 
 Fuentes: [Playwright en Docker y seccomp](https://playwright.dev/docs/docker), [restricciones userns de Chromium/Ubuntu](https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md). Las conclusiones concretas de este documento proceden de las pruebas reales guardadas en `verificacion.json`.
+
+
+## Vinculación y entrega verificadas — 07/11/2026
+Esta actualización sustituye los estados pendientes de las anotaciones anteriores.
+
+- Usuario confirmó de nuevo el vínculo QR. Se cerró exclusivamente el aviso «Novedades en WhatsApp Web», que impedía abrir el chat propio. El worker ya reconoce ese aviso concreto.
+- El único mensaje sintético `mail-test-20261107-01`, sin datos de correo, se observó en el chat propio con estado **Leído**. La interfaz actual usa `conv-msg-*` y etiquetas de estado en lugar de la clase `message-out` y los iconos antiguos. Por eso el primer detector lo dejó como incierto. Se reconcilió como enviado tras comprobarlo, sin reenviarlo.
+- Detector corregido y publicado mediante GitOps. Tras recrear el pod, WhatsApp recuperó la sesión sin solicitar otro QR; hubo un breve periodo de carga antes de linked=true. Prueba real del detector: true, una sola burbuja del mensaje de prueba.
+- El transporte n8n → cola PostgreSQL → Playwright/Chromium en pi5 → chat propio de WhatsApp está comprobado. Los envíos inciertos siguen sin reintentarse automáticamente.
+- Las cuentas Hotmail, Live y Gmail aún NO están conectadas; no se ha leído, clasificado, eliminado ni resumido correo real. Falta configurar OAuth y las reglas del agente antes de activar la gestión de correo.
+- El perfil persiste en el PVC local y se ha probado una recreación del pod; esto no equivale a copia/restauración del perfil ni a tolerancia a pérdida del disco. Su copia automática específica continúa pendiente. El respaldo cifrado existente de n8n conserva sus credenciales y las bases de datos.
+- Tarea Windows de WhatsApp desactivada; ningún emisor Codex programado. Sin nuevas API de pago.
