@@ -185,6 +185,8 @@ def probes(sha):
         hosts += [('adguard.'+domain, (200,302))]
     if modern and (RELEASES / sha / 'n8n.conf').exists():
         hosts += [('n8n.'+domain, (200,302))]
+    if modern and (RELEASES / sha / 'whatsapp.conf').exists():
+        hosts += [('whatsapp.'+domain, (401,))]
     results = {}
     for host, allowed in hosts:
         code = run(['/usr/bin/curl', '--silent', '--show-error', '--max-time', '10',
