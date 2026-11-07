@@ -3,7 +3,7 @@ const http=require('http'),crypto=require('crypto'),fs=require('fs'),path=requir
 const ROOT=__dirname;if(process.platform==='win32')process.env.PLAYWRIGHT_BROWSERS_PATH=path.join(ROOT,'browsers');
 const {chromium}=require('playwright');
 const PRIVATE=process.env.DATA_DIR||path.join(ROOT,'private'),cfg=JSON.parse(fs.readFileSync(process.env.CONFIG_FILE||path.join(PRIVATE,'config.json'),'utf8'));
-const CP=path.join(PRIVATE,'checkpoint.json');let ctx,page,ready=false,busy=false,stopping=false,lastError=null;
+const CP=path.join(PRIVATE,'checkpoint.json');let ctx,page,ready=false,busy=false,stopping=false,lastError=null,xvfb;
 const ownEvidence=/\((?:Tú|You)\)|(?:message yourself|mensajes? a ti mismo|envía mensajes a este mismo número)/i;
 const equal=(a,b)=>crypto.timingSafeEqual(crypto.createHash('sha256').update(a||'').digest(),crypto.createHash('sha256').update(b||'').digest());
 function json(res,status,obj){res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(obj));}
@@ -48,6 +48,11 @@ async function tick(){
  finally{busy=false;}
 }
 async function startBrowser(){
+ if(process.env.PW_XVFB==='1'){
+  process.env.DISPLAY=':99';xvfb=require('child_process').spawn('/usr/bin/Xvfb',[':99','-screen','0','1280x900x24','-nolisten','tcp'],{stdio:'ignore'});
+  for(let i=0;i<50&&!fs.existsSync('/tmp/.X11-unix/X99');i++)await new Promise(r=>setTimeout(r,200));
+  if(!fs.existsSync('/tmp/.X11-unix/X99'))throw new Error('virtual_display_not_ready');
+ }
  ctx=await chromium.launchPersistentContext(path.join(PRIVATE,'profile'),{...(process.platform==='linux'?{channel:'chromium'}:{}),headless:process.env.PW_HEADED!=='1',chromiumSandbox:true,locale:'es-ES',viewport:{width:1280,height:900},acceptDownloads:false});
  page=ctx.pages()[0]||await ctx.newPage();page.on('dialog',d=>d.dismiss());await page.goto('https://web.whatsapp.com/',{waitUntil:'domcontentloaded',timeout:90000});ready=true;
 }
@@ -67,5 +72,5 @@ const server=http.createServer(async(req,res)=>{
  }catch(e){json(res,503,{error:'not_ready'});}
 });
 (async()=>{server.listen(Number(process.env.PORT||18996),process.env.LISTEN_HOST||'127.0.0.1');await startBrowser();setInterval(tick,60000);await tick();})().catch(e=>{console.error('whatsapp_start_failed:'+e.name+': '+e.message);process.exit(1)});
-async function stop(){stopping=true;server.close();if(ctx)await ctx.close().catch(()=>{});process.exit(0)}
+async function stop(){stopping=true;server.close();if(ctx)await ctx.close().catch(()=>{});if(xvfb)xvfb.kill('SIGTERM');process.exit(0)}
 process.on('SIGTERM',stop);process.on('SIGINT',stop);
