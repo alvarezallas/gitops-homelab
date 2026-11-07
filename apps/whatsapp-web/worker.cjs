@@ -29,12 +29,30 @@ async function self(){
  if(!ownEvidence.test(await page.locator('#main header').innerText()))throw new Error('self_header_not_verified');
 }
 function marker(id){return 'BF-DIGEST:'+crypto.createHash('sha256').update(id).digest('hex').slice(0,12);}
-async function confirmed(id){const bubble=page.locator('#main .message-out').filter({hasText:marker(id)});if(!await bubble.count())return false;return await bubble.locator('[data-icon="msg-check"], [data-icon="msg-dblcheck"], [data-icon="msg-dblcheck-ack"]').first().isVisible().catch(()=>false);}
+async function confirmed(id){
+ const bubble=page.locator('#main [data-testid^="conv-msg-"], #main .message-out').filter({hasText:marker(id)});
+ for(let i=0;i<await bubble.count();i++){
+  const item=bubble.nth(i);
+  if(!await item.locator('[data-icon="tail-out"]').count()&&!await item.evaluate(e=>e.classList.contains('message-out')))continue;
+  const legacy=item.locator('[data-icon="msg-check"], [data-icon="msg-dblcheck"], [data-icon="msg-dblcheck-ack"]');
+  if(await legacy.first().isVisible().catch(()=>false))return true;
+  const meta=item.locator('[data-testid="msg-meta"]');
+  if(await meta.getByLabel(/^\s*(?:Enviado|Entregado|Leído|Sent|Delivered|Read)\s*$/i).first().isVisible().catch(()=>false))return true;
+ }
+ return false;
+}
+async function dismissWelcome(){
+ const d=page.getByRole('dialog');if(await d.count()!==1)return;
+ if(!(await d.innerText()).includes('Novedades en WhatsApp Web'))return;
+ const b=d.getByRole('button',{name:'Continuar',exact:true});if(await b.count()===1)await b.click({timeout:10000});
+}
+
 async function receipt(job,state){const r=await queue('receipt',{id:job.id,lease:job.lease,state});if(r.receipt?.id!==job.id)throw new Error('receipt_not_confirmed');fs.unlinkSync(CP);}
 async function tick(){
  if(busy||stopping||!ready||fs.existsSync(path.join(PRIVATE,'delivery.paused')))return;busy=true;
  try{
   if(!await linked())return;
+  await dismissWelcome();
   await self();
   if(fs.existsSync(CP)){
    const job=JSON.parse(fs.readFileSync(CP,'utf8'));await receipt(job,await confirmed(job.id)?'sent':'uncertain');return;
