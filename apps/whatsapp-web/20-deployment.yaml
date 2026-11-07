@@ -15,7 +15,7 @@ spec:
       labels:
         app: whatsapp-web
       annotations:
-        bearsfamily.es/code-sha256: cd63d221bc7c7a94b6a7da5f7135bbe5c15a5c6250bf50c4a65144b4fc43248c
+        bearsfamily.es/code-sha256: 1d6c75d41c2ac4cf30c3155a13b078a43e82b2f75ea695d4648a89fb96b24f06
     spec:
       nodeSelector:
         kubernetes.io/hostname: pi5
@@ -70,6 +70,10 @@ spec:
       - name: worker
         image: mcr.microsoft.com/playwright:v1.65.0-noble@sha256:ccf917390e8eea6cad2bb493313b9d8db2856ed41c24db0a6727eacc766fd273
         command:
+        - flock
+        - --nonblock
+        - --no-fork
+        - /data/.instance.lock
         - node
         - /app/worker.cjs
         env:
@@ -88,6 +92,8 @@ spec:
         - name: LISTEN_HOST
           value: 0.0.0.0
         - name: PW_XVFB
+          value: '1'
+        - name: WA_EXCLUSIVE_LOCKED
           value: '1'
         ports:
         - name: http

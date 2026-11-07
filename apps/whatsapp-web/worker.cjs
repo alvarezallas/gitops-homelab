@@ -49,6 +49,12 @@ async function tick(){
 }
 async function startBrowser(){
  if(process.platform==='linux'){
+  if(process.env.WA_EXCLUSIVE_LOCKED!=='1')throw new Error('exclusive_profile_lock_required');
+  // Deployment uses flock --no-fork before Node; the volume cannot have two workers.
+  const profile=path.join(PRIVATE,'profile');fs.mkdirSync(profile,{recursive:true});
+  for(const name of ['SingletonLock','SingletonCookie','SingletonSocket']){
+   const f=path.join(profile,name);try{const s=fs.lstatSync(f);if(s.isSymbolicLink()||s.isFile())fs.unlinkSync(f);}catch(e){if(e.code!=='ENOENT')throw e;}
+  }
   process.env.HOME=path.join(PRIVATE,'home');process.env.XDG_CONFIG_HOME=path.join(PRIVATE,'home/.config');process.env.XDG_CACHE_HOME=path.join(PRIVATE,'home/.cache');
   fs.mkdirSync(process.env.XDG_CONFIG_HOME,{recursive:true});fs.mkdirSync(process.env.XDG_CACHE_HOME,{recursive:true});
  }
