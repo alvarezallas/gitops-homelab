@@ -76,7 +76,8 @@ const server=http.createServer(async(req,res)=>{
   if(u.pathname==='/diagnostics'){
    const selected=await page.locator('button,[role="button"]').evaluateAll(es=>es.map(e=>({name:e.getAttribute('aria-label')||e.getAttribute('title')||'',visible:!!e.getClientRects().length})).filter(x=>/^(Nuevo chat|New chat)(\b|$)/i.test(x.name)));
    const selfTexts=await page.getByText(/(?:mismo número|mensajes a ti mismo|message yourself)/i).evaluateAll(es=>es.filter(e=>e.getClientRects().length).map(e=>({tag:e.tagName,text:e.textContent.trim().slice(0,140)})));
-   return json(res,200,{url:new URL(page.url()).origin,pane_side:await page.locator('#pane-side').count(),side:await page.locator('#side').count(),main:await page.locator('#main').count(),qr:await page.locator('[data-ref] canvas').count(),new_chat_buttons:selected,self_entries:selfTexts,dialogs:await page.getByRole('dialog').count()});
+   const remember=await page.getByRole('checkbox').evaluateAll(es=>es.map(e=>({checked:e.checked??e.getAttribute('aria-checked'),label:e.getAttribute('aria-label')||e.closest('label')?.textContent?.trim()||''})));
+   return json(res,200,{url:new URL(page.url()).origin,pane_side:await page.locator('#pane-side').count(),side:await page.locator('#side').count(),main:await page.locator('#main').count(),qr:await page.locator('[data-ref] canvas').count(),new_chat_buttons:selected,self_entries:selfTexts,dialogs:await page.getByRole('dialog').count(),remember_session:remember});
   }
   if(u.pathname==='/qr'){
    if(!ready||await linked())return json(res,404,{error:'qr_not_available'});
