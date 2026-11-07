@@ -9,14 +9,22 @@ const equal=(a,b)=>crypto.timingSafeEqual(crypto.createHash('sha256').update(a||
 function json(res,status,obj){res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(obj));}
 function checkpoint(d){const temp=CP+'.tmp';fs.writeFileSync(temp,JSON.stringify(d));fs.renameSync(temp,CP);}
 async function queue(action,body){const r=await fetch(cfg.queue_url+'/'+action,{method:'POST',redirect:'error',headers:{'Content-Type':'application/json','X-Bears-Queue':cfg.queue_token},body:JSON.stringify(body),signal:AbortSignal.timeout(60000)});if(!r.ok)throw new Error('queue_http_'+r.status);return r.json();}
-async function linked(){return !!page&&!page.isClosed()&&await page.locator('#pane-side').isVisible().catch(()=>false);}
+async function linked(){
+ if(!page||page.isClosed())return false;
+ if(await page.locator('[data-ref] canvas').isVisible().catch(()=>false))return false;
+ for(const selector of ['#pane-side','#side','#main'])if(await page.locator(selector).isVisible().catch(()=>false))return true;
+ return await page.getByText(/^(?:Envía mensajes a (?:este mismo número|ti mismo)\.?|Message yourself|Mensajes a ti mismo)$/i).isVisible().catch(()=>false);
+}
 async function self(){
  if(!await linked())throw new Error('session_not_linked');
  const h=page.locator('#main header');if(await h.isVisible().catch(()=>false)&&ownEvidence.test(await h.innerText()))return;
- let b=page.getByRole('button',{name:/^(Nuevo chat|New chat)$/i});
- if(await b.count()!==1)throw new Error('new_chat_not_unique');await b.click();
- let entry=page.getByText(/^(Envía mensajes a este mismo número\.?|Message yourself|Mensajes a ti mismo)$/i);
- if(await entry.count()!==1)throw new Error('self_entry_not_unique');await entry.click();
+ let entry=page.getByText(/^(?:Envía mensajes a (?:este mismo número|ti mismo)\.?|Message yourself|Mensajes a ti mismo)$/i);
+ if(!await entry.isVisible().catch(()=>false)){
+  const b=page.getByRole('button',{name:/^(Nuevo chat|New chat)$/i});
+  if(await b.count()!==1)throw new Error('new_chat_not_unique');await b.click({timeout:10000});
+ }
+ await entry.first().waitFor({state:'visible',timeout:15000});
+ if(await entry.count()!==1)throw new Error('self_entry_not_unique');await entry.click({timeout:10000});
  await page.locator('#main header').waitFor({timeout:15000});
  if(!ownEvidence.test(await page.locator('#main header').innerText()))throw new Error('self_header_not_verified');
 }
