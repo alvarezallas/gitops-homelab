@@ -67,6 +67,11 @@ const server=http.createServer(async(req,res)=>{
   if(req.method!=='GET')return json(res,405,{error:'method_not_allowed'});
   const u=new URL(req.url,'http://127.0.0.1');
   if(u.pathname==='/status')return json(res,200,{browser_ready:ready,linked:await linked(),busy,last_error:lastError,checkpoint:fs.existsSync(CP)});
+  if(u.pathname==='/diagnostics'){
+   const selected=await page.locator('button,[role="button"]').evaluateAll(es=>es.map(e=>({name:e.getAttribute('aria-label')||e.getAttribute('title')||'',visible:!!e.getClientRects().length})).filter(x=>/^(Nuevo chat|New chat)(\b|$)/i.test(x.name)));
+   const selfTexts=await page.getByText(/(?:mismo número|mensajes a ti mismo|message yourself)/i).evaluateAll(es=>es.filter(e=>e.getClientRects().length).map(e=>({tag:e.tagName,text:e.textContent.trim().slice(0,140)})));
+   return json(res,200,{url:new URL(page.url()).origin,pane_side:await page.locator('#pane-side').count(),side:await page.locator('#side').count(),main:await page.locator('#main').count(),qr:await page.locator('[data-ref] canvas').count(),new_chat_buttons:selected,self_entries:selfTexts,dialogs:await page.getByRole('dialog').count()});
+  }
   if(u.pathname==='/qr'){
    if(!ready||await linked())return json(res,404,{error:'qr_not_available'});
    const qr=page.locator('[data-ref] canvas, canvas[aria-label*="QR"]');if(await qr.count()!==1)return json(res,503,{error:'waiting_for_qr'});
