@@ -48,6 +48,10 @@ async function tick(){
  finally{busy=false;}
 }
 async function startBrowser(){
+ if(process.platform==='linux'){
+  process.env.HOME=path.join(PRIVATE,'home');process.env.XDG_CONFIG_HOME=path.join(PRIVATE,'home/.config');process.env.XDG_CACHE_HOME=path.join(PRIVATE,'home/.cache');
+  fs.mkdirSync(process.env.XDG_CONFIG_HOME,{recursive:true});fs.mkdirSync(process.env.XDG_CACHE_HOME,{recursive:true});
+ }
  if(process.env.PW_XVFB==='1'){
   process.env.DISPLAY=':99';xvfb=require('child_process').spawn('/usr/bin/Xvfb',[':99','-screen','0','1280x900x24','-nolisten','tcp'],{stdio:'ignore'});
   for(let i=0;i<50&&!fs.existsSync('/tmp/.X11-unix/X99');i++)await new Promise(r=>setTimeout(r,200));

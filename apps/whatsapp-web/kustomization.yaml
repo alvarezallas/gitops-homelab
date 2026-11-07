@@ -12,3 +12,5 @@ configMapGenerator:
   - worker.cjs
   - package.json
   - package-lock.json
+generatorOptions:
+  disableNameSuffixHash: true
