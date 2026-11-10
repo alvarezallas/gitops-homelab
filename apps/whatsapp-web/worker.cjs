@@ -30,6 +30,12 @@ async function self(){
 }
 function marker(id){return 'BF-DIGEST:'+crypto.createHash('sha256').update(id).digest('hex').slice(0,12);}
 async function confirmed(id){
+ const containers=page.locator('#main [data-testid="msg-container"]').filter({hasText:marker(id)});
+ const receiptLabel=/^\s*(?:Enviado|Entregado|Leído|Sent|Delivered|Read)\s*$/i;
+ if(await containers.count()===1){
+  const receipt=containers.locator('[data-testid="msg-meta"]').getByLabel(receiptLabel);
+  if(await receipt.count()===1&&await receipt.isVisible())return true;
+ }
  const bubble=page.locator('#main [data-testid^="conv-msg-"], #main .message-out').filter({hasText:marker(id)});
  for(let i=0;i<await bubble.count();i++){
   const item=bubble.nth(i);
