@@ -70,7 +70,8 @@ async function tick(){
    if(await confirmed(job.id)){await receipt(job,'sent');return;}
    const input=page.locator('#main footer [contenteditable="true"][role="textbox"]');
    if(await input.count()!==1)throw new Error('composer_not_unique');if((await input.innerText()).trim())throw new Error('existing_draft');
-   await input.fill(job.body+'\n['+marker(job.id)+']');
+   const [title, ...bodyLines]=job.body.split('\n');
+   await input.fill([title,'['+marker(job.id)+']',...bodyLines].join('\n'));
    if(!ownEvidence.test(await page.locator('#main header').innerText()))throw new Error('self_header_changed');
    await input.press('Enter');
    for(let i=0;i<30;i++){if(await confirmed(job.id)){await receipt(job,'sent');lastError=null;return;}await page.waitForTimeout(1000);}
