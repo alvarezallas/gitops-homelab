@@ -100,12 +100,53 @@ async function startBrowser(){
  page=ctx.pages()[0]||await ctx.newPage();page.on('dialog',d=>d.dismiss());await page.goto('https://web.whatsapp.com/',{waitUntil:'domcontentloaded',timeout:90000});ready=true;
 }
 const HTML=`<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>BearsFamily · WhatsApp</title><style>body{font:16px system-ui;background:#0b141a;color:#d9fdd3;max-width:720px;margin:40px auto;padding:20px}img{max-width:300px;background:white}a{color:#8ce9bf}</style><h1>Vincular WhatsApp Web</h1><p>En tu móvil: WhatsApp → Dispositivos vinculados → Vincular un dispositivo.</p><p id="status">Iniciando…</p><img id="qr" alt="QR privado de WhatsApp" hidden><p>Perfil exclusivo del agente. Solo entrega al chat propio. No compartas esta página ni su contraseña.</p><script>async function update(){const s=await(await fetch('/status')).json();statusEl=document.getElementById('status');statusEl.textContent=s.linked?'Sesión vinculada. Esperando la prueba de entrega.':s.browser_ready?'Escanea el QR con tu móvil.':'Iniciando navegador…';const i=document.getElementById('qr');i.hidden=s.linked||!s.browser_ready;if(!i.hidden)i.src='/qr?t='+Date.now()}update();setInterval(update,12000)</script></html>`;
+const chapterJob = /^story-[a-f0-9]{16}$/;
+
+async function chapterReview(id) {
+ if (busy) return { state: 'busy' };
+ busy = true;
+ try {
+  if (!await linked()) return { state: 'unlinked' };
+  await self();
+  if (!await confirmed(id)) return { state: 'awaiting_delivery' };
+  const reference = marker(id);
+  const code = id.slice(-8).toUpperCase();
+  const decision = await page.locator('#main [data-testid="msg-container"]').evaluateAll((rows, args) => {
+   const bodySelector = '[data-pre-plain-text] .selectable-text, .copyable-text .selectable-text';
+   const quoteSelector = '[data-testid*="quoted"], [data-testid*="reply-preview"]';
+   const draft = rows.findIndex(row => [...row.querySelectorAll(bodySelector)].some(node =>
+    !node.closest(quoteSelector) && node.innerText.includes(`[${args.reference}]`)));
+   if (draft < 0) return null;
+   for (const row of rows.slice(draft + 1)) {
+    const ownMessage = row.closest('.message-out') || row.querySelector('[data-icon="tail-out"]');
+    if (!ownMessage) continue;
+    const quote = [...row.querySelectorAll(quoteSelector)].some(node =>
+     node.innerText.includes(`[${args.reference}]`) || node.innerText.includes(`Revision ${args.code}`));
+    const parts = [...row.querySelectorAll(bodySelector)].filter(node => !node.closest(quoteSelector));
+    const body = [...new Set(parts.map(node => node.innerText.trim()).filter(Boolean))].join(' ').replace(/\s+/g, ' ').toUpperCase();
+    if (body === `OK ${args.code}` || (quote && body === 'OK')) return 'ok';
+    if (body === `NO ${args.code}` || (quote && body === 'NO')) return 'no';
+   }
+   return null;
+  }, { reference, code });
+  return decision ? { state: 'answered', decision } : { state: 'awaiting_reply' };
+ } finally {
+  busy = false;
+ }
+}
+
 const server=http.createServer(async(req,res)=>{
  try{
   if(!equal(req.headers.authorization,'Basic '+Buffer.from('bearsfamily:'+cfg.admin_password).toString('base64'))){res.writeHead(401,{'WWW-Authenticate':'Basic realm="BearsFamily WhatsApp"','Cache-Control':'no-store'});return res.end();}
   if(req.method!=='GET')return json(res,405,{error:'method_not_allowed'});
   const u=new URL(req.url,'http://127.0.0.1');
   if(u.pathname==='/status')return json(res,200,{browser_ready:ready,linked:await linked(),busy,last_error:lastError,checkpoint:fs.existsSync(CP)});
+  if (u.pathname === '/chapter-review') {
+   if (req.method !== 'GET') return json(res, 405, { error: 'method_not_allowed' });
+   const id = u.searchParams.get('id') || '';
+   if (!chapterJob.test(id)) return json(res, 400, { error: 'invalid_chapter_reference' });
+   return json(res, 200, await chapterReview(id));
+  }
   if(u.pathname==='/diagnostics'){
    const selected=await page.locator('button,[role="button"]').evaluateAll(es=>es.map(e=>({name:e.getAttribute('aria-label')||e.getAttribute('title')||'',visible:!!e.getClientRects().length})).filter(x=>/^(Nuevo chat|New chat)(\b|$)/i.test(x.name)));
    const selfTexts=await page.getByText(/(?:mismo número|mensajes a ti mismo|message yourself)/i).evaluateAll(es=>es.filter(e=>e.getClientRects().length).map(e=>({tag:e.tagName,text:e.textContent.trim().slice(0,140)})));
