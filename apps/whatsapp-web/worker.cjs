@@ -100,7 +100,7 @@ async function startBrowser(){
  page=ctx.pages()[0]||await ctx.newPage();page.on('dialog',d=>d.dismiss());await page.goto('https://web.whatsapp.com/',{waitUntil:'domcontentloaded',timeout:90000});ready=true;
 }
 const HTML=`<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>BearsFamily · WhatsApp</title><style>body{font:16px system-ui;background:#0b141a;color:#d9fdd3;max-width:720px;margin:40px auto;padding:20px}img{max-width:300px;background:white}a{color:#8ce9bf}</style><h1>Vincular WhatsApp Web</h1><p>En tu móvil: WhatsApp → Dispositivos vinculados → Vincular un dispositivo.</p><p id="status">Iniciando…</p><img id="qr" alt="QR privado de WhatsApp" hidden><p>Perfil exclusivo del agente. Solo entrega al chat propio. No compartas esta página ni su contraseña.</p><script>async function update(){const s=await(await fetch('/status')).json();statusEl=document.getElementById('status');statusEl.textContent=s.linked?'Sesión vinculada. Esperando la prueba de entrega.':s.browser_ready?'Escanea el QR con tu móvil.':'Iniciando navegador…';const i=document.getElementById('qr');i.hidden=s.linked||!s.browser_ready;if(!i.hidden)i.src='/qr?t='+Date.now()}update();setInterval(update,12000)</script></html>`;
-const chapterJob = /^story-[a-f0-9]{16}$/;
+const chapterJob = /^mail-story-[a-f0-9]{16}$/;
 
 async function chapterReview(id) {
  if (busy) return { state: 'busy' };
