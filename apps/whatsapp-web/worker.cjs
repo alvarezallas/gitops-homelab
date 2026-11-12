@@ -210,7 +210,7 @@ async function sendChapterImage(job) {
  const caption = page.locator('[contenteditable="true"][role="textbox"]:visible').filter({ hasNotText: /\S/ });
  const previewCaption = caption.locator('xpath=self::*[not(ancestor::footer)]');
  await previewCaption.fill(`${job.body}\n[${marker(job.id)}]`, { timeout: 10000 });
- const send = page.getByRole('button', { name: /^(?:Enviar|Send)$/i }).filter({ visible: true });
+ const send = page.getByRole('button', { name: /^(?:Enviar(?: 1 seleccionado)?|Send(?: 1 selected)?)$/i }).filter({ visible: true });
  await send.click({ timeout: 10000 });
 }
 
