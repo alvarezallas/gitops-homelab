@@ -68,12 +68,16 @@ async function tick(){
   checkpoint({id:job.id,lease:job.lease});
   try{
    if(await confirmed(job.id)){await receipt(job,'sent');return;}
+   if (/^mail-story-[a-f0-9]{16}-image$/.test(job.id)) {
+    await sendChapterImage(job);
+   } else {
    const input=page.locator('#main footer [contenteditable="true"][role="textbox"]');
    if(await input.count()!==1)throw new Error('composer_not_unique');if((await input.innerText()).trim())throw new Error('existing_draft');
    const [title, ...bodyLines]=job.body.split('\n');
    await input.fill([title,'['+marker(job.id)+']',...bodyLines].join('\n'));
    if(!ownEvidence.test(await page.locator('#main header').innerText()))throw new Error('self_header_changed');
    await input.press('Enter');
+   }
    for(let i=0;i<30;i++){if(await confirmed(job.id)){await receipt(job,'sent');lastError=null;return;}await page.waitForTimeout(1000);}
    throw new Error('send_result_not_confirmed');
   }catch(e){lastError=/^[a-z_]+$/.test(e.message)?e.message:'browser_operation_failed';if(fs.existsSync(CP))await receipt(job,'uncertain');}
@@ -109,14 +113,17 @@ async function chapterReview(id) {
   if (!await linked()) return { state: 'unlinked' };
   await self();
   if (!await confirmed(id)) return { state: 'awaiting_delivery' };
+  if (fs.existsSync(chapterImagePath(id)) && !await confirmed(`${id}-image`)) return { state: 'awaiting_image' };
   const reference = marker(id);
   const code = id.slice(-8).toUpperCase();
+  const optionReferences = { ok: marker(`${id}-ok-option`), no: marker(`${id}-no-option`) };
   const decision = await page.locator('#main [data-testid="msg-container"]').evaluateAll((rows, args) => {
    const bodySelector = '[data-pre-plain-text] .selectable-text, .copyable-text .selectable-text';
    const quoteSelector = '[data-testid*="quoted"], [data-testid*="reply-preview"]';
    const draft = rows.findIndex(row => [...row.querySelectorAll(bodySelector)].some(node =>
     !node.closest(quoteSelector) && node.innerText.includes(`[${args.reference}]`)));
    if (draft < 0) return null;
+   const optionsSeen = new Set();
    for (const row of rows.slice(draft + 1)) {
     const ownMessage = row.closest('.message-out') || row.querySelector('[data-icon="tail-out"]');
     if (!ownMessage) continue;
@@ -124,22 +131,95 @@ async function chapterReview(id) {
      node.innerText.includes(`[${args.reference}]`) || node.innerText.includes(`Revision ${args.code}`));
     const parts = [...row.querySelectorAll(bodySelector)].filter(node => !node.closest(quoteSelector));
     const body = [...new Set(parts.map(node => node.innerText.trim()).filter(Boolean))].join(' ').replace(/\s+/g, ' ').toUpperCase();
+    const option = /^(OK|NO) ([A-F0-9]{8})-OP(?: \[(BF-DIGEST:[A-F0-9]{12})\])?$/.exec(body);
+    if (option && option[2] === args.code) {
+     const answer = option[1].toLowerCase();
+     const expectedMarker = args.optionReferences[answer].toUpperCase();
+     if (option[3] === expectedMarker && !optionsSeen.has(answer)) {
+      optionsSeen.add(answer);
+      continue;
+     }
+     if (optionsSeen.has(answer) && (!option[3] || option[3] === expectedMarker)) return answer;
+    }
     if (body === `OK ${args.code}` || (quote && body === 'OK')) return 'ok';
     if (body === `NO ${args.code}` || (quote && body === 'NO')) return 'no';
    }
    return null;
-  }, { reference, code });
+  }, { reference, code, optionReferences });
   return decision ? { state: 'answered', decision } : { state: 'awaiting_reply' };
  } finally {
   busy = false;
  }
 }
 
+const chapterImageDir = path.join(PRIVATE, 'chapter-images');
+const pngSignature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+const maxChapterImageBytes = 5 * 1024 * 1024;
+
+function chapterImagePath(id) {
+ if (!chapterJob.test(id)) throw new Error('invalid_chapter_reference');
+ return path.join(chapterImageDir, `${id}.png`);
+}
+
+async function uploadChapterImage(req, res, url) {
+ const id = url.searchParams.get('id') || '';
+ if (!chapterJob.test(id) || req.headers['content-type'] !== 'image/png') {
+  return json(res, 400, { error: 'invalid_chapter_image' });
+ }
+ const size = Number(req.headers['content-length']);
+ if (!Number.isSafeInteger(size) || size < 33 || size > maxChapterImageBytes) {
+  return json(res, 413, { error: 'chapter_image_size' });
+ }
+ const chunks = [];
+ let read = 0;
+ for await (const chunk of req) {
+  read += chunk.length;
+  if (read > size) return json(res, 413, { error: 'chapter_image_size' });
+  chunks.push(chunk);
+ }
+ const png = Buffer.concat(chunks);
+ if (read !== size || !png.subarray(0, 8).equals(pngSignature) || png.toString('ascii', 12, 16) !== 'IHDR') {
+  return json(res, 400, { error: 'invalid_chapter_image' });
+ }
+ const digest = content => crypto.createHash('sha256').update(content).digest('hex');
+ const filename = chapterImagePath(id);
+ fs.mkdirSync(chapterImageDir, { recursive: true, mode: 0o700 });
+ const temporary = `${filename}.${crypto.randomUUID()}.tmp`;
+ try {
+  fs.writeFileSync(temporary, png, { flag: 'wx', mode: 0o600 });
+  try { fs.linkSync(temporary, filename); } catch (error) { if (error.code !== 'EEXIST') throw error; }
+ } finally {
+  fs.rmSync(temporary, { force: true });
+ }
+ if (digest(fs.readFileSync(filename)) !== digest(png)) return json(res, 409, { error: 'chapter_image_already_set' });
+ return json(res, 200, { id, sha256: digest(png) });
+}
+
+async function sendChapterImage(job) {
+ const id = job.id.slice(0, -'-image'.length);
+ const image = chapterImagePath(id);
+ if (!fs.existsSync(image)) throw new Error('chapter_image_missing');
+ const attach = page.getByRole('button', { name: /^(?:Adjuntar|Attach)$/i });
+ await attach.click({ timeout: 10000 });
+ const gallery = page.getByText(/^(?:Fotos y v[ií]deos|Photos & videos)$/i, { exact: true });
+ const [chooser] = await Promise.all([
+  page.waitForEvent('filechooser', { timeout: 10000 }),
+  gallery.click({ timeout: 10000 }),
+ ]);
+ await chooser.setFiles(image);
+ const caption = page.locator('[contenteditable="true"][role="textbox"]:visible').filter({ hasNotText: /\S/ });
+ const previewCaption = caption.locator('xpath=self::*[not(ancestor::footer)]');
+ await previewCaption.fill(`${job.body}\n[${marker(job.id)}]`, { timeout: 10000 });
+ const send = page.getByRole('button', { name: /^(?:Enviar|Send)$/i }).filter({ visible: true });
+ await send.click({ timeout: 10000 });
+}
+
 const server=http.createServer(async(req,res)=>{
  try{
   if(!equal(req.headers.authorization,'Basic '+Buffer.from('bearsfamily:'+cfg.admin_password).toString('base64'))){res.writeHead(401,{'WWW-Authenticate':'Basic realm="BearsFamily WhatsApp"','Cache-Control':'no-store'});return res.end();}
-  if(req.method!=='GET')return json(res,405,{error:'method_not_allowed'});
   const u=new URL(req.url,'http://127.0.0.1');
+  if (req.method === 'POST' && u.pathname === '/chapter-image') return await uploadChapterImage(req, res, u);
+  if(req.method!=='GET')return json(res,405,{error:'method_not_allowed'});
   if(u.pathname==='/status')return json(res,200,{browser_ready:ready,linked:await linked(),busy,last_error:lastError,checkpoint:fs.existsSync(CP)});
   if (u.pathname === '/chapter-review') {
    if (req.method !== 'GET') return json(res, 405, { error: 'method_not_allowed' });
