@@ -3,7 +3,8 @@
     "mode": "local",
     "bind": "lan",
     "port": 18789,
-    "auth": { "mode": "token" },
+    "auth": { "mode": "token", "rateLimit": { "maxAttempts": 10, "windowMs": 60000, "lockoutMs": 300000 } },
+    "http": { "endpoints": { "chatCompletions": { "enabled": true } } },
     "controlUi": { "enabled": true, "allowedOrigins": ["https://openclaw.bearsfamily.es"] }
   },
   "agents": {
@@ -26,7 +27,9 @@
   },
   "tools": {
     "profile": "minimal",
+    "elevated": { "enabled": false },
     "deny": ["gateway", "group:runtime", "group:fs", "group:web", "browser", "group:messaging"]
   },
-  "cron": { "enabled": false }
+  "cron": { "enabled": false },
+  "browser": { "enabled": false }
 }
