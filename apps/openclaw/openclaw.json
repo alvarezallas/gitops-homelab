@@ -10,10 +10,10 @@
     "defaults": {
       "workspace": "/home/node/.openclaw/workspace",
       "model": { "primary": "ollama/qwen3.5:4b", "fallbacks": [] },
-      "memorySearch": { "enabled": false },
       "heartbeat": { "every": "0m" }
     }
   },
+  "memory": { "search": { "enabled": false } },
   "models": {
     "providers": {
       "ollama": {
