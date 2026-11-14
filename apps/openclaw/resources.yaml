@@ -81,6 +81,21 @@ spec:
         runAsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+        - name: install-config
+          image: ghcr.io/openclaw/openclaw@sha256:adc5f5e9654afa3056666cb8f42415a72b91631fc301b382d5771456fee95477
+          command: [sh, -ec, 'umask 077; cp /etc/openclaw/openclaw.json /home/node/.openclaw/.openclaw.json.new; mv /home/node/.openclaw/.openclaw.json.new /home/node/.openclaw/openclaw.json']
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests: { cpu: 50m, memory: 32Mi }
+            limits: { cpu: 100m, memory: 64Mi }
+          volumeMounts:
+            - { name: state, mountPath: /home/node/.openclaw }
+            - { name: config, mountPath: /etc/openclaw, readOnly: true }
       containers:
         - name: gateway
           image: ghcr.io/openclaw/openclaw@sha256:adc5f5e9654afa3056666cb8f42415a72b91631fc301b382d5771456fee95477
@@ -89,7 +104,7 @@ spec:
             - name: HOME
               value: /home/node
             - name: OPENCLAW_CONFIG_PATH
-              value: /etc/openclaw/openclaw.json
+              value: /home/node/.openclaw/openclaw.json
             - name: XDG_CACHE_HOME
               value: /home/node/.openclaw/.cache
             - name: NODE_ENV
@@ -112,8 +127,8 @@ spec:
             capabilities:
               drop: [ALL]
           resources:
-            requests: { cpu: 250m, memory: 512Mi }
-            limits: { cpu: "1", memory: 1536Mi }
+            requests: { cpu: 250m, memory: 768Mi }
+            limits: { cpu: "1", memory: 2Gi }
           startupProbe:
             exec:
               command: [node, -e, "fetch('http://127.0.0.1:18789/readyz').then(async r => process.exit(r.ok && (await r.json()).ready === true ? 0 : 1)).catch(() => process.exit(1))"]
@@ -132,7 +147,6 @@ spec:
             timeoutSeconds: 10
           volumeMounts:
             - { name: state, mountPath: /home/node/.openclaw }
-            - { name: config, mountPath: /etc/openclaw, readOnly: true }
             - { name: tmp, mountPath: /tmp }
       volumes:
         - name: state
