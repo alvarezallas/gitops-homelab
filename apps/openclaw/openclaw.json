@@ -49,7 +49,6 @@
     },
     "entries": {
       "main": {
-        "default": true,
         "subagents": {
           "allowAgents": [
             "imagenes"
