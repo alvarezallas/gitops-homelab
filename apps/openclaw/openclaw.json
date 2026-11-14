@@ -1,0 +1,32 @@
+{
+  "gateway": {
+    "mode": "local",
+    "bind": "lan",
+    "port": 18789,
+    "auth": { "mode": "token" },
+    "controlUi": { "enabled": true, "allowedOrigins": ["https://openclaw.bearsfamily.es"] }
+  },
+  "agents": {
+    "defaults": {
+      "workspace": "/home/node/.openclaw/workspace",
+      "model": { "primary": "ollama/qwen3.5:4b", "fallbacks": [] },
+      "memorySearch": { "enabled": false },
+      "heartbeat": { "every": "0m" }
+    }
+  },
+  "models": {
+    "providers": {
+      "ollama": {
+        "baseUrl": "https://openclaw.bearsfamily.es/_ollama",
+        "api": "ollama",
+        "apiKey": "${OPENCLAW_OLLAMA_TOKEN}",
+        "models": [{ "id": "qwen3.5:4b", "name": "Qwen 3.5 4B", "input": ["text"], "contextWindow": 32768, "maxTokens": 4096 }]
+      }
+    }
+  },
+  "tools": {
+    "profile": "minimal",
+    "deny": ["gateway", "group:runtime", "group:fs", "group:web", "browser", "group:messaging"]
+  },
+  "cron": { "enabled": false }
+}

@@ -20,3 +20,4 @@ resources:
 - adguard.yaml
 - n8n.yaml
 - whatsapp-web.yaml
+- openclaw.yaml
