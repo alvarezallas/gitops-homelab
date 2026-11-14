@@ -69,6 +69,9 @@ spec:
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
+      hostAliases:
+        - ip: 192.168.1.163
+          hostnames: [openclaw.bearsfamily.es]
       nodeSelector:
         kubernetes.io/hostname: pi5
       tolerations:
