@@ -207,10 +207,10 @@ async function sendChapterImage(job) {
   gallery.click({ timeout: 10000 }),
  ]);
  await chooser.setFiles(image);
- const caption = page.locator('[contenteditable="true"][role="textbox"]:visible').filter({ hasNotText: /\S/ });
- const previewCaption = caption.locator('xpath=self::*[not(ancestor::footer)]');
+ const previewCaption = page.getByRole('textbox', { name: /^(?:Escribe un mensaje|Type a message)$/i })
+  .locator('xpath=self::*[not(ancestor::footer)]').filter({ visible: true });
  await previewCaption.fill(`${job.body}\n[${marker(job.id)}]`, { timeout: 10000 });
- const send = page.getByRole('button', { name: /^(?:Enviar(?: 1 seleccionado)?|Send(?: 1 selected)?)$/i }).filter({ visible: true });
+ const send = page.getByRole('button', { name: /^(?:Enviar 1 seleccionado|Send 1 selected)$/i }).filter({ visible: true });
  await send.click({ timeout: 10000 });
 }
 
