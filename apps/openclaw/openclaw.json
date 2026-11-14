@@ -3,33 +3,123 @@
     "mode": "local",
     "bind": "lan",
     "port": 18789,
-    "auth": { "mode": "token", "rateLimit": { "maxAttempts": 10, "windowMs": 60000, "lockoutMs": 300000 } },
-    "http": { "endpoints": { "chatCompletions": { "enabled": true } } },
-    "controlUi": { "enabled": true, "allowedOrigins": ["https://openclaw.bearsfamily.es"] }
+    "auth": {
+      "mode": "token",
+      "rateLimit": {
+        "maxAttempts": 10,
+        "windowMs": 60000,
+        "lockoutMs": 300000
+      }
+    },
+    "http": {
+      "endpoints": {
+        "chatCompletions": {
+          "enabled": true
+        }
+      }
+    },
+    "controlUi": {
+      "enabled": true,
+      "allowedOrigins": [
+        "https://openclaw.bearsfamily.es"
+      ]
+    }
   },
   "agents": {
     "defaults": {
       "workspace": "/home/node/.openclaw/workspace",
-      "model": { "primary": "ollama/qwen3.5:4b", "fallbacks": [] },
-      "heartbeat": { "every": "0m" }
+      "model": {
+        "primary": "ollama/qwen3.5:4b",
+        "fallbacks": []
+      },
+      "heartbeat": {
+        "every": "0m"
+      },
+      "mediaModels": {
+        "image": {
+          "primary": "openai/gpt-image-2",
+          "fallbacks": []
+        }
+      },
+      "subagents": {
+        "maxConcurrent": 1,
+        "maxSpawnDepth": 1,
+        "requireAgentId": true
+      }
+    },
+    "entries": {
+      "main": {
+        "default": true,
+        "subagents": {
+          "allowAgents": [
+            "imagenes"
+          ]
+        }
+      },
+      "imagenes": {
+        "name": "ImÃ¡genes",
+        "workspace": "/home/node/.openclaw/workspace-imagenes",
+        "tools": {
+          "deny": [
+            "sessions_spawn",
+            "sessions_yield",
+            "subagents",
+            "agents_list"
+          ]
+        }
+      }
     }
   },
-  "memory": { "search": { "enabled": false } },
+  "memory": {
+    "search": {
+      "enabled": false
+    }
+  },
   "models": {
     "providers": {
       "ollama": {
         "baseUrl": "https://openclaw.bearsfamily.es/_ollama",
         "api": "ollama",
         "apiKey": "${OPENCLAW_OLLAMA_TOKEN}",
-        "models": [{ "id": "qwen3.5:4b", "name": "Qwen 3.5 4B", "input": ["text"], "contextWindow": 32768, "maxTokens": 4096 }]
+        "models": [
+          {
+            "id": "qwen3.5:4b",
+            "name": "Qwen 3.5 4B",
+            "input": [
+              "text"
+            ],
+            "contextWindow": 32768,
+            "maxTokens": 4096
+          }
+        ]
       }
     }
   },
   "tools": {
     "profile": "minimal",
-    "elevated": { "enabled": false },
-    "deny": ["gateway", "group:runtime", "group:fs", "group:web", "browser", "group:messaging"]
+    "elevated": {
+      "enabled": false
+    },
+    "deny": [
+      "gateway",
+      "group:runtime",
+      "group:fs",
+      "group:web",
+      "browser",
+      "group:messaging"
+    ],
+    "alsoAllow": [
+      "agents_list",
+      "image_generate",
+      "sessions_spawn",
+      "sessions_yield",
+      "subagents"
+    ]
   },
-  "cron": { "enabled": false },
-  "browser": { "enabled": false }
+  "cron": {
+    "enabled": false
+  },
+  "browser": {
+    "enabled": false
+  }
 }
