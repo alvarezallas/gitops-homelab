@@ -45,6 +45,9 @@
         "maxConcurrent": 1,
         "maxSpawnDepth": 1,
         "requireAgentId": true
+      },
+      "systemAgent": {
+        "agentId": "main"
       }
     },
     "entries": {
@@ -67,7 +70,8 @@
           ]
         }
       }
-    }
+    },
+    "ownership": "explicit"
   },
   "memory": {
     "search": {
