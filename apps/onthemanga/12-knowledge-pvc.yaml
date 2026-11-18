@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: onthemanga-knowledge
+  namespace: onthemanga
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  accessModes:
+  - ReadWriteMany
+  storageClassName: nfs-storage
+  volumeName: onthemanga-knowledge-pv
+  resources:
+    requests:
+      storage: 20Gi

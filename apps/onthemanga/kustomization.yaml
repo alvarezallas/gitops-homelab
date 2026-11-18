@@ -9,3 +9,4 @@ resources:
 - 22-mailpit-web-service.yaml
 - 30-web-deployment.yaml
 - 31-web-service.yaml
+- 12-knowledge-pvc.yaml

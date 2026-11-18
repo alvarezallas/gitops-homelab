@@ -16,3 +16,4 @@ resources:
 - 12-speakr-data-pv.yaml
 - 13-n8n-data-pv.yaml
 - 14-whatsapp-web-data-pv.yaml
+- 09-onthemanga-knowledge-pv.yaml

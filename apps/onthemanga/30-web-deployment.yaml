@@ -33,7 +33,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: web
-        image: docker.io/homelab/onthemanga@sha256:4ea713e85084c177b2e01109d64ff05894183bc00ff004f1930eac0b2efa1e04
+        image: docker.io/homelab/onthemanga@sha256:220e39a60127571edfec157318de9ad6045a541a9f5ecc187ca8ffcf90eacf1f
         imagePullPolicy: Never
         ports:
         - name: http
@@ -50,6 +50,26 @@ spec:
           value: https://onthemanga.bearsfamily.es
         - name: APP_MAIL_FROM
           value: noreply@onthemanga.bearsfamily.es
+        - name: APP_AI_URL
+          value: https://onthemanga.bearsfamily.es/_ai
+        - name: APP_AI_WORKER_ENABLED
+          value: 'true'
+        - name: APP_AI_WORKER_DELAY
+          value: '1000'
+        - name: APP_KNOWLEDGE_DIRECTORY
+          value: /data/knowledge
+        - name: APP_STORAGE_DIRECTORY
+          value: /data/knowledge/objects
+        - name: APP_AI_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: onthemanga-knowledge-api
+              key: ai
+        - name: APP_KNOWLEDGE_IMPORT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: onthemanga-knowledge-api
+              key: import
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
@@ -76,6 +96,8 @@ spec:
         - name: postgres-ca
           mountPath: /etc/postgresql-ca
           readOnly: true
+        - name: knowledge
+          mountPath: /data/knowledge
         startupProbe:
           httpGet:
             path: /actuator/health/liveness
@@ -111,4 +133,7 @@ spec:
       - name: postgres-ca
         configMap:
           name: postgresql-ca
+      - name: knowledge
+        persistentVolumeClaim:
+          claimName: onthemanga-knowledge
       terminationGracePeriodSeconds: 45
