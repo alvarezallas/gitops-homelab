@@ -118,7 +118,9 @@ spec:
         - name: ASR_RETURN_SPEAKER_EMBEDDINGS
           value: 'false'
         - name: ASR_TIMEOUT
-          value: '2370'
+          value: '6000'
+        - name: JOB_MAX_RETRIES
+          value: '1'
         envFrom:
         - secretRef:
             name: speakr-config
@@ -178,7 +180,7 @@ spec:
           \ self.headers.get('Content-Length', '')\n        if not length.isdecimal()\
           \ or not 0 < int(length) <= 250 * 1024 * 1024:\n            self.send_error(413)\n\
           \            return\n        upstream = http.client.HTTPSConnection('notas.bearsfamily.es',\
-          \ timeout=2350)\n        try:\n            upstream.putrequest('POST', '/_pc-ai'\
+          \ timeout=5700)\n        try:\n            upstream.putrequest('POST', '/_pc-ai'\
           \ + self.path)\n            upstream.putheader('Authorization', 'Bearer\
           \ ' + os.environ['ASR_TOKEN'])\n            upstream.putheader('Content-Type',\
           \ self.headers.get('Content-Type', 'application/octet-stream'))\n      \
