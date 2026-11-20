@@ -33,7 +33,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: web
-        image: docker.io/homelab/onthemanga@sha256:ec0b335331673a62650b69837d54f7b0472a78775f2fa8c5a5f620779508bcec
+        image: docker.io/homelab/onthemanga@sha256:19fa1f08782f4701bb32ae4dbaac5b23890c4a349b3ad78ca620d64552958e90
         imagePullPolicy: Never
         ports:
         - name: http
