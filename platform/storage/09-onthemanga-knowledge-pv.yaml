@@ -16,7 +16,7 @@ spec:
     namespace: onthemanga
     name: onthemanga-knowledge
   nfs:
-    server: 192.168.1.164
+    server: 10.19.19.164
     path: /mnt/d12tb/on-the-manga
   mountOptions:
   - hard

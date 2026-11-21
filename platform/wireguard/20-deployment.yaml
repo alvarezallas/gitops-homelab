@@ -60,7 +60,7 @@
                 "name": "wireguard",
                 "containerPort": 51820,
                 "hostPort": 51820,
-                "hostIP": "192.168.1.163",
+                "hostIP": "0.0.0.0",
                 "protocol": "UDP"
               },
               {

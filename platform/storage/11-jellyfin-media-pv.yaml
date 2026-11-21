@@ -21,6 +21,6 @@ spec:
   - retrans=2
   - ro
   nfs:
-    server: 192.168.1.164
+    server: 10.19.19.164
     path: /mnt/d12tb/qbittorrent/downloads
     readOnly: true

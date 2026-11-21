@@ -64,7 +64,7 @@ spec:
         - name: TRUSTED_PROXY_HOPS
           value: '1'
         - name: TRUSTED_PROXIES
-          value: 10.244.0.0/24,192.168.1.163,127.0.0.1
+          value: 10.244.0.0/24,10.19.19.163,127.0.0.1
         - name: UPLOAD_FOLDER
           value: /data/uploads
         - name: ENABLE_INQUIRE_MODE
