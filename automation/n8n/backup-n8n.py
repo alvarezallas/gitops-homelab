@@ -60,7 +60,7 @@ def restore_test(plain):
 def copy_nas(enc):
  mount=pathlib.Path('/run/n8n-backup-target');mount.mkdir(exist_ok=True)
  assert subprocess.run(['mountpoint','-q',str(mount)]).returncode!=0
- run(['mount','-t','nfs','-o','nfsvers=4.2,soft,timeo=50,retrans=2','192.168.1.164:/mnt/d01tb/n8n-backups',str(mount)])
+ run(['mount','-t','nfs','-o','nfsvers=4.2,soft,timeo=50,retrans=2','10.19.19.164:/mnt/d01tb/n8n-backups',str(mount)])
  try:
   code=r'''import pathlib,sys,os,re,datetime,hashlib,json
 base=pathlib.Path('/run/n8n-backup-target');name=sys.argv[1];assert re.fullmatch(r'n8n-\d{8}T\d{6}Z\.n8b',name)

@@ -4,7 +4,7 @@ import pathlib,subprocess,os,json,urllib.request,base64,argparse,tempfile,time
 ROOT=pathlib.Path('/var/lib/homelab-apps/adguard-home');P=pathlib.Path('/etc/dnsmasq.d/homelab.conf');BACK=ROOT/'private/dnsmasq-before-cutover.conf'
 def run(a):return subprocess.check_output(a,text=True,stderr=subprocess.STDOUT,timeout=15)
 def answers(host,qtype='A',port=53):
- return sorted(run(['dig','@192.168.1.163','-p',str(port),host,qtype,'+short','+time=3','+tries=1']).strip().splitlines())
+ return sorted(run(['dig','@10.19.19.163','-p',str(port),host,qtype,'+short','+time=3','+tries=1']).strip().splitlines())
 def replace(data):
  st=P.stat()
  with tempfile.NamedTemporaryFile(dir=P.parent,delete=False) as f:
@@ -13,8 +13,8 @@ def replace(data):
 def apply(mode):
  assert os.geteuid()==0 and P.resolve()==P
  current=P.read_bytes();text=current.decode()
- if mode=='status':return {'mode':'enabled' if 'server=192.168.1.163#30553' in text.splitlines() else 'bypass'}
- old='server=80.58.61.250';new='server=192.168.1.163#30553'
+ if mode=='status':return {'mode':'enabled' if 'server=10.19.19.163#30553' in text.splitlines() else 'bypass'}
+ old='server=80.58.61.250';new='server=10.19.19.163#30553'
  if mode=='enable':
   d=json.loads((ROOT/'private/credentials.json').read_text());h={'Authorization':'Basic '+base64.b64encode((d['username']+':'+d['password']).encode()).decode()}
   ready=False

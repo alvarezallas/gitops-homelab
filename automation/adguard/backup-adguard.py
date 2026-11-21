@@ -76,7 +76,7 @@ def restore_check(plain):
 def offsite(enc):
  mount=pathlib.Path('/run/adguard-backup-target');mount.mkdir(mode=0o755,exist_ok=True)
  assert subprocess.run(['mountpoint','-q',str(mount)]).returncode!=0
- run(['mount','-t','nfs','-o','nfsvers=4.2,soft,timeo=50,retrans=2','192.168.1.164:/mnt/d01tb/adguard-backups',str(mount)])
+ run(['mount','-t','nfs','-o','nfsvers=4.2,soft,timeo=50,retrans=2','10.19.19.164:/mnt/d01tb/adguard-backups',str(mount)])
  try:
   writer="""import pathlib,sys,hashlib,os,re,datetime,json
 os.umask(0o077);base=pathlib.Path('/run/adguard-backup-target');name=sys.argv[1];assert re.fullmatch(r'adguard-\\d{8}T\\d{6}Z\\.agh',name)

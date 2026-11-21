@@ -133,7 +133,7 @@ def tunnel():
  while True:
   c=paramiko.SSHClient();c.set_missing_host_key_policy(Pin())
   try:
-   c.connect('192.168.1.163',username='alvarense',key_filename=str(ROOT/'secrets/tunnel'),look_for_keys=False,allow_agent=False,timeout=15)
+   c.connect('10.19.19.163',username='alvarense',key_filename=str(ROOT/'secrets/tunnel'),look_for_keys=False,allow_agent=False,timeout=15)
    t=c.get_transport();t.set_keepalive(20)
    t.request_port_forward('127.0.0.1',18995,handler=lambda ch,origin,server:threading.Thread(target=forward,args=(ch,),daemon=True).start())
    log.info('Private SSH tunnel connected')

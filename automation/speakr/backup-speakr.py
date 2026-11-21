@@ -27,7 +27,7 @@ def backup(test=False):
  try:
   run(K+['scale','deployment/speakr','-n',ns,'--replicas=0']);scaled=True
   run(K+['wait','-n',ns,'--for=delete','pod','-l','app=speakr','--timeout=90s'])
-  run(['mount','-t','nfs','-o','ro,nfsvers=4.2,hard','192.168.1.164:/mnt/d01tb/speakr',str(mount)]);mounted=True
+  run(['mount','-t','nfs','-o','ro,nfsvers=4.2,hard','10.19.19.164:/mnt/d01tb/speakr',str(mount)]);mounted=True
   with (out/'database.dump').open('wb') as f:
    p=subprocess.run(K+['exec','-n','databases','homelab-postgres-1','-c','postgres','--','pg_dump','-Fc','-d','speakr'],stdout=f,stderr=subprocess.PIPE,timeout=300)
    assert p.returncode==0,'Database dump failed'
