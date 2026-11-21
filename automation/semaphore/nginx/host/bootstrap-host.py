@@ -76,9 +76,9 @@ with tempfile.TemporaryDirectory(prefix='semaphore-nginx-key-',dir='/run') as td
  # Never include kubectl stderr/stdin in an exception for private operations.
  p=subprocess.run(K+['apply','-f','-'],input=json.dumps(secret),text=True,capture_output=True,timeout=30)
  assert p.returncode==0,'Private Secret bootstrap failed (output suppressed)'
- write('/etc/ssh/authorized_keys/semaphore-nginx','restrict,from="10.244.0.0/16,192.168.1.163",command="/usr/local/libexec/homelab-nginx-ssh" '+pub+'\n',0o644)
+ write('/etc/ssh/authorized_keys/semaphore-nginx','restrict,from="10.244.0.0/16,10.19.19.163",command="/usr/local/libexec/homelab-nginx-ssh" '+pub+'\n',0o644)
  run(['ssh-keygen','-lf',str(key)+'.pub'])
 run(['sshd','-t']);run(['systemctl','reload','ssh']);run(['systemctl','daemon-reload']);run(['systemctl','enable','homelab-nginx-recover.service'])
 hostpub=P('/etc/ssh/ssh_host_ed25519_key.pub').read_text().split()
-known='192.168.1.163 '+hostpub[0]+' '+hostpub[1]+'\n'
+known='10.19.19.163 '+hostpub[0]+' '+hostpub[1]+'\n'
 print(json.dumps({'migration_commit':sha,'previous_commit':initial,'https':checks,'known_hosts':known,'secret':'semaphore/semaphore-nginx-ssh','ssh_user':'semaphore-nginx','sites_available':str(P('/etc/nginx/sites-available').resolve()),'sites_enabled':str(P('/etc/nginx/sites-enabled').resolve())}))

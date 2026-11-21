@@ -8,7 +8,7 @@ Panel: **https://adguard.bearsfamily.es**. También aparece en el menú de aplic
 - Contraseña: archivo privado del PC `C:\Users\aalva\Documents\Codex\ia-workspace-runtime\adguard-home\secrets\acceso.txt`.
 - Credenciales y clave de copias fuera de Git y OneDrive. No compartir capturas del registro de consultas sin revisarlas.
 
-El filtrado ya está activo para los dispositivos que consultan `192.168.1.163`. El usuario cambió el DHCP del router; una renovación del PC confirmó que dejó de anunciar el DNS público de Movistar. El router devuelve `.163` dos veces: ambas entradas apuntan al mismo DNS doméstico.
+El filtrado ya está activo para los dispositivos que consultan `10.19.19.163`. El usuario cambió el DHCP del router; una renovación del PC confirmó que dejó de anunciar el DNS público de Movistar. El router devuelve `.163` dos veces: ambas entradas apuntan al mismo DNS doméstico.
 
 Reconecta el Wi-Fi o renueva la concesión de los demás equipos para que recojan el cambio. La navegación y la web interna funcionan en el PC y en un segundo dispositivo móvil/tablet, según la comprobación del usuario. Dispositivos con DNS estático, DNS privado de Android o DoH propio pueden evitar este filtro; no se ha impuesto interceptación.
 
@@ -83,7 +83,7 @@ La última orden crea otra copia y comprueba una restauración aislada. Los dato
 Conecta por IP aunque fallen los nombres:
 
 ```bash
-ssh alvarense@192.168.1.163
+ssh alvarense@10.19.19.163
 sudo /usr/local/sbin/homelab-adguard-dns status
 sudo /usr/local/sbin/homelab-adguard-dns bypass
 ```

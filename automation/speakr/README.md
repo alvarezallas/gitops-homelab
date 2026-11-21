@@ -23,7 +23,7 @@ La biblioteca contiene una **Prueba sintética de instalación** de unos 13 segu
 | PostgreSQL | DB `speakr`, rol propio `speakr_app`, TLS `verify-full`, CA montada |
 | Archivos | NAS `.164:/mnt/d01tb/speakr`, PV `speakr-data-pv`, PVC propio de 30 GiB nominales |
 | nginx | HTTPS existente, upstream `127.0.0.1:30095`; publicación atómica por Semaphore |
-| DNS | Registro privado exacto `notas.bearsfamily.es → 192.168.1.163` |
+| DNS | Registro privado exacto `notas.bearsfamily.es → 10.19.19.163` |
 | Transcripción | faster-whisper `medium` multilingüe, RTX 2070, `int8_float16` |
 | Resúmenes y chat | Ollama `qwen3.5:4b`, local |
 | Búsqueda semántica | Ollama `embeddinggemma:300m`, CPU del PC, mediante API privada |
